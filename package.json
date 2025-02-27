@@ -1,0 +1,25 @@
+{
+  "name": "flame",
+  "version": "1.0.0",
+  "description": "Project repository for Elective II, a Tinder clone where some functionalities will be replicated to develop skills in REST API development with Node.js and Express.js.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node --watch index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jpaa0511/Flame.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/jpaa0511/Flame/issues"
+  },
+  "homepage": "https://github.com/jpaa0511/Flame#readme",
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}
