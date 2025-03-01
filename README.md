@@ -47,5 +47,4 @@ Además, en la etapa final del proyecto, se integrará un frontend desarrollado 
 • Frameworks:  
    • Frontend: React.js  
    • Backend: Node.js - Express.js 
-
 • Base de datos: MongoDB
