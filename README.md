@@ -9,8 +9,9 @@ Flame crew
 
 ## Integrantes del Equipo
 • Juan Pablo Agudelo Arango.    
-• Jaiber Emilio Higuita Gomez.
+• Jaiber Emilio Higuita Gomez.    
 • Sebastian Garcia.
+
 
 ## Descripción del Proyecto
 Proyecto: Clone de Tinder
