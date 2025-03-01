@@ -43,8 +43,8 @@ Además, en la etapa final del proyecto, se integrará un frontend desarrollado 
 6. Ingresa por el puerto que indica la consola.
 
 ## Requerimientos
-• Lenguaje: JavaScript (ES6+)  
-• Frameworks:  
-   • Frontend: React.js  
-   • Backend: Node.js - Express.js 
-• Base de datos: MongoDB
+* Lenguaje: JavaScript (ES6+)
+* Frameworks:
+    * Frontend: React.js
+    * Backend: Node.js - Express.js
+* Base de datos: MongoDB
