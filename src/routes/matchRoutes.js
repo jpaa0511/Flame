@@ -1,8 +1,11 @@
 const express = require("express");
 const { registerSwipe, getMatches } = require("../controllers/matchController");
+const { validateSwipe } = require("../middlewares/validationMiddleware");
+const { authenticateUser } = require("../middlewares/authMiddleware");
 const router = express.Router();
 
-router.post("/swipes", registerSwipe);
-router.get("/matches", getMatches);
+// EndPoints con middleware
+router.post("/swipes", authenticateUser, validateSwipe, registerSwipe);
+router.get("/matches", authenticateUser, getMatches);
 
 module.exports = router;

@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/jpaa0511/Flame#readme",
   "dependencies": {
-    "express": "^4.21.2"
+    "express": "^4.21.2",
+    "express-validator": "^7.2.1"
   }
 }
