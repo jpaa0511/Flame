@@ -4,13 +4,19 @@ Electiva Software 2
 ## Nombre Completo del Proyecto
 Clone de Tinder
 
+## Nombre de la Materia
+Electiva Software 2
+
+## Nombre Completo del Proyecto
+Clone de Tinder
+
 ## Nombre del Equipo
 Flame crew
 
 ## Integrantes del Equipo
 • Juan Pablo Agudelo Arango.    
 • Jaiber Emilio Higuita Gomez.    
-• Sebastian Garcia.
+• Sebastian Garcia Marin.
 
 
 ## Descripción del Proyecto
@@ -37,10 +43,12 @@ Además, en la etapa final del proyecto, se integrará un frontend desarrollado 
 4. Instala las dependencias necesarias:
    ```bash
    npm install
-5. Ejecuta el proyecto:
+5. Ejecuta el proyecto con la documentacion (Swagger):
    ```bash
-   npm run dev
-6. Ingresa por el puerto que indica la consola.
+   node swagger.js
+6. Ingresa por el puerto.
+   ```bash
+   http://localhost:3000/docs
 
 ## Requerimientos
 * Lenguaje: JavaScript (ES6+)
