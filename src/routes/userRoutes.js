@@ -10,7 +10,7 @@ const router = express.Router();
 
 // EndPoints con middleware
 router.post("/register", validateRegister, registerUser);
-router.get("/users", authenticateUser, getUsers);
+router.get("/users", getUsers);
 router.post("/available", authenticateUser, getAvailableUsers);
 
 module.exports = router;

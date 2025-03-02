@@ -6,6 +6,6 @@ const router = express.Router();
 
 // EndPoints con middleware
 router.post("/swipes", authenticateUser, validateSwipe, registerSwipe);
-router.get("/matches", authenticateUser, getMatches);
+router.get("/matches", getMatches);
 
 module.exports = router;

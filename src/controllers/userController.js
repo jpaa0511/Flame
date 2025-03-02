@@ -10,6 +10,7 @@ const registerUser = (req, res) => {
 // Obtener lista de usuarios
 const getUsers = (req, res) => {
   res.json(users);
+  console.log(users)
 };
 
 const getAvailableUsers = (req, res) => {
