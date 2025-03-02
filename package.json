@@ -20,6 +20,13 @@
   },
   "homepage": "https://github.com/jpaa0511/Flame#readme",
   "dependencies": {
-    "express": "^4.21.2"
+    "express": "^4.21.2",
+    "express-validator": "^7.2.1"
+  },
+  "devDependencies": {
+    "install": "^0.13.0",
+    "npm": "^11.1.0",
+    "swagger-autogen": "^2.23.7",
+    "swagger-ui-express": "^5.0.1"
   }
 }
