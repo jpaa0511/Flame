@@ -20,8 +20,10 @@
   },
   "homepage": "https://github.com/jpaa0511/Flame#readme",
   "dependencies": {
+    "dotenv": "^16.4.7",
     "express": "^4.21.2",
-    "express-validator": "^7.2.1"
+    "express-validator": "^7.2.1",
+    "mongoose": "^8.13.2"
   },
   "devDependencies": {
     "install": "^0.13.0",

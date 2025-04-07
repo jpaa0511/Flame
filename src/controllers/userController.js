@@ -1,16 +1,49 @@
-const { users, matches } = require("../models/users");
+const { users, matches } = require("../models/users"); // Eliminar porque es un maquetado de la primera entrega
+const User = require("../modelos/User");
 
-// Registrar usuario
-const registerUser = (req, res) => {
-  const { userId, name } = req.body;
-  users.push({ userId, name });
-  res.json({ message: "Usuario registrado", userId });
+// RegisterUser
+const registerUser = async (req, res) => {
+  const {
+    name,
+    age,
+    email,
+    gender,
+    department,
+    city,
+    interests,
+    photos,
+    bio,
+    preferences,
+  } = req.body;
+
+  const newUser = new User({
+    name,
+    age,
+    email,
+    gender,
+    department,
+    city,
+    interests,
+    photos,
+    bio,
+    preferences,
+  });
+
+  try {
+    const newRecord = await newUser.save();
+    res.status(201).json({
+      newRecord
+    });
+  } catch (error) {
+    console.log();
+    res.status(400).json({ message: error.message });
+  }
 };
 
 // Obtener lista de usuarios
 const getUsers = (req, res) => {
   res.json(users);
-  console.log(users)
+  console.log(users);
 };
 
 const getAvailableUsers = (req, res) => {
