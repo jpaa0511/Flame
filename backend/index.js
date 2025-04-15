@@ -7,7 +7,7 @@ const express = require("express");
 const app = express();
 
 // Import database connection function
-const { dbConnection } = require("./backend/database/config");
+const { dbConnection } = require("./database/config");
 
 // Connect to the database
 dbConnection();
@@ -20,9 +20,9 @@ const swaggerFile = require("./swagger_output.json");
 app.use(express.json());
 
 // Import route modules
-const userRoutes = require("./backend/src/routes/userRoutes");
-const authRoutes = require("./backend/src/routes/authRoutes");
-const matchRoutes = require("./backend/src/routes/matchRoutes");
+const userRoutes = require("./src/routes/userRoutes");
+const authRoutes = require("./src/routes/authRoutes");
+const matchRoutes = require("./src/routes/matchRoutes");
 
 // Register routes with the app
 app.use(userRoutes);
