@@ -1,4 +1,4 @@
-const { swipes, matches } = require("../models/users");
+const { swipes, matches } = require("../models/User");
 
 // Registrar swipe
 const registerSwipe = (req, res) => {

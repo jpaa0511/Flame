@@ -84,6 +84,8 @@ const validateRegister = [
   }
 ];
 
+
+// COMENTADO PORQUE NO SON DATOS DE LA BD, ORGANIZAR PARA UTILIZAR MODELO NUEVO.
 // Validacion de login
 const validateLogin = [
   body("userId").notEmpty().withMessage("userId es requerido"),

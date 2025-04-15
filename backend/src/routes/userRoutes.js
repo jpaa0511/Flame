@@ -6,7 +6,6 @@ const {
 } = require("../controllers/userController");
 const { authenticateUser } = require("../middlewares/authMiddleware");
 const { validateRegister } = require("../middlewares/validationMiddleware");
-const User = require('../modelos/User')
 const router = express.Router();
 
 // EndPoints con middleware

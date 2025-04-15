@@ -1,4 +1,4 @@
-const { users } = require("../models/users");
+const { users } = require("../models/User");
 
 // Validar usuario
 const authenticateUser = (req, res, next) => {

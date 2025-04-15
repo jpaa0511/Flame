@@ -1,4 +1,4 @@
-const { users } = require("../models/users");
+const { users } = require("../models/User");
 
 // Iniciar sesión
 const loginUser = (req, res) => {

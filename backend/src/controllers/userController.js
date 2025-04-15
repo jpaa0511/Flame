@@ -1,7 +1,7 @@
-const { users, matches } = require("../models/users"); // Eliminar porque es un maquetado de la primera entrega
-const User = require("../modelos/User");
+const { users, matches } = require("../models/User"); // Eliminar porque es un maquetado de la primera entrega
+const User = require("../models/User");
 
-// RegisterUser
+// Register User
 const registerUser = async (req, res) => {
   const {
     name,
