@@ -15,7 +15,14 @@ const UserSchema = new mongoose.Schema({
   email: {
     type: String,
     required: true,
+    unique: true,
     trim: true,
+    lowercase: true,
+  },
+  password: {
+    type: String,
+    required: true,
+    minlength: 6,
   },
   gender: {
     type: String,
@@ -71,6 +78,10 @@ const UserSchema = new mongoose.Schema({
         default: "",
       },
     },
+  },
+  isRegistrationComplete: {
+    type: Boolean,
+    default: false,
   },
   createdAt: {
     type: Date,

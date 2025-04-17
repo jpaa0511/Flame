@@ -6,6 +6,16 @@ const PORT = process.env.API_PORT;
 const express = require("express");
 const app = express();
 
+// Import CORS
+const cors = require("cors");
+
+// Configure CORS
+app.use(cors({
+  origin: 'http://localhost:4000', // URL de tu frontend
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 // Import database connection function
 const { dbConnection } = require("./database/config");
 
@@ -25,9 +35,9 @@ const authRoutes = require("./src/routes/authRoutes");
 const matchRoutes = require("./src/routes/matchRoutes");
 
 // Register routes with the app
-app.use(userRoutes);
-app.use(authRoutes);
-app.use(matchRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/matches", matchRoutes);
 
 // Serve Swagger API documentation
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerFile));
