@@ -15,7 +15,14 @@ const UserSchema = new mongoose.Schema({
   email: {
     type: String,
     required: true,
+    unique: true,
     trim: true,
+    lowercase: true,
+  },
+  password: {
+    type: String,
+    required: true,
+    minlength: 6,
   },
   gender: {
     type: String,
@@ -72,6 +79,10 @@ const UserSchema = new mongoose.Schema({
       },
     },
   },
+  isRegistrationComplete: {
+    type: Boolean,
+    default: false,
+  },
   createdAt: {
     type: Date,
     default: Date.now,
@@ -81,11 +92,5 @@ const UserSchema = new mongoose.Schema({
     default: Date.now,
   },
 });
-
-// Middleware para actualizar updatedAt automáticamente
-// UserSchema.pre("save", function (next) {
-//   this.updatedAt = new Date();
-//   next();
-// });
 
 module.exports = mongoose.model("User", UserSchema);

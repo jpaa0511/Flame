@@ -1,79 +1,61 @@
 const { body, validationResult } = require("express-validator");
 
 const validateRegister = [
+  body("email")
+    .notEmpty()
+    .withMessage("El email es requerido")
+    .isEmail()
+    .withMessage("Formato de email inválido"),
+
+  body("password")
+    .notEmpty()
+    .withMessage("La contraseña es requerida")
+    .isLength({ min: 6 })
+    .withMessage("La contraseña debe tener al menos 6 caracteres"),
+
   body("name")
     .notEmpty()
-    .withMessage("Name is required"),
+    .withMessage("El nombre es requerido"),
 
   body("age")
     .notEmpty()
-    .withMessage("Age is required")
+    .withMessage("La edad es requerida")
     .isInt({ min: 18, max: 100 })
-    .withMessage("Age must be a number between 18 and 100"),
-
-  body("email")
-    .optional()
-    .isEmail()
-    .withMessage("Invalid email format"),
+    .withMessage("La edad debe estar entre 18 y 100 años"),
 
   body("gender")
     .notEmpty()
-    .withMessage("Gender is required")
+    .withMessage("El género es requerido")
     .isIn(["male", "female", "other"])
-    .withMessage("Gender must be 'male', 'female', or 'other'"),
+    .withMessage("El género debe ser 'male', 'female' u 'other'"),
 
   body("department")
     .notEmpty()
-    .withMessage("Department is required"),
+    .withMessage("El departamento es requerido"),
 
   body("city")
     .notEmpty()
-    .withMessage("City is required"),
+    .withMessage("La ciudad es requerida"),
 
   body("interests")
     .optional()
     .isArray()
-    .withMessage("Interests must be an array"),
+    .withMessage("Los intereses deben ser un array"),
 
   body("photos")
     .optional()
     .isArray()
-    .withMessage("Photos must be an array"),
+    .withMessage("Las fotos deben ser un array"),
 
   body("bio")
     .optional()
     .isString()
-    .withMessage("Bio must be a string"),
+    .withMessage("La biografía debe ser un texto"),
 
   body("preferences")
     .optional()
     .isObject()
-    .withMessage("Preferences must be an object"),
-
-  body("preferences.gender")
-    .optional()
-    .isIn(["male", "female", "other", "any"])
-    .withMessage("Preferences.gender must be 'male', 'female', 'other', or 'any'"),
-
-  body("preferences.ageRange.min")
-    .optional()
-    .isInt({ min: 18 })
-    .withMessage("Minimum age must be at least 18"),
-
-  body("preferences.ageRange.max")
-    .optional()
-    .isInt({ max: 100 })
-    .withMessage("Maximum age must be no more than 100"),
-
-  body("preferences.location.department")
-    .optional()
-    .isString()
-    .withMessage("preferences.location.department must be a string"),
-
-  body("preferences.location.city")
-    .optional()
-    .isString()
-    .withMessage("preferences.location.city must be a string"),
+    .withMessage("Las preferencias deben ser un objeto"),
 
   (req, res, next) => {
     const errors = validationResult(req);
@@ -84,21 +66,28 @@ const validateRegister = [
   }
 ];
 
-
-// COMENTADO PORQUE NO SON DATOS DE LA BD, ORGANIZAR PARA UTILIZAR MODELO NUEVO.
-// Validacion de login
+// Login validation
 const validateLogin = [
-  body("userId").notEmpty().withMessage("userId es requerido"),
+  body("email")
+    .notEmpty()
+    .withMessage("El email es requerido")
+    .isEmail()
+    .withMessage("Formato de email inválido"),
+
+  body("password")
+    .notEmpty()
+    .withMessage("La contraseña es requerida"),
+
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
     next();
-  },
+  }
 ];
 
-// Validacion de Matches
+// Validación de Matches
 const validateSwipe = [
   body("userId").notEmpty().withMessage("userId es requerido"),
   body("targetUserId").notEmpty().withMessage("targetUserId es requerido"),
@@ -114,4 +103,8 @@ const validateSwipe = [
   },
 ];
 
-module.exports = { validateLogin, validateSwipe, validateRegister };
+module.exports = { 
+  validateLogin, 
+  validateSwipe, 
+  validateRegister 
+};

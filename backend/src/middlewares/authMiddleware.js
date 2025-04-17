@@ -1,13 +1,14 @@
-const { users } = require("../models/User");
+const bcrypt = require('bcryptjs');
 
-// Validar usuario
-const authenticateUser = (req, res, next) => {
-  const { userId } = req.body;
-  const user = users.find((u) => u.userId === userId);
-  if (!user) {
-    return res.status(401).json({ error: "Usuario no autenticado" });
-  }
-  next();
+// Encrypt password
+const hashPassword = async (password) => {
+  const salt = await bcrypt.genSalt(10);
+  return await bcrypt.hash(password, salt);
 };
 
-module.exports = { authenticateUser };
+// Compare password with hash
+const comparePassword = async (password, hash) => {
+  return await bcrypt.compare(password, hash);
+};
+
+module.exports = { hashPassword, comparePassword }; 
