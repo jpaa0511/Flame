@@ -93,10 +93,4 @@ const UserSchema = new mongoose.Schema({
   },
 });
 
-// Middleware para actualizar updatedAt automáticamente
-// UserSchema.pre("save", function (next) {
-//   this.updatedAt = new Date();
-//   next();
-// });
-
 module.exports = mongoose.model("User", UserSchema);

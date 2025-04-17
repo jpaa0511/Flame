@@ -20,6 +20,7 @@ export const userService = {
     return response.json();
   },
 
+// FUnciones para demas servicios, realizar funciones en el backend para que devuelva la info
   async updateProfile(userId: string, userData: Partial<User>) {
     const response = await fetch(`${API_URL}/users/${userId}`, {
       method: 'PUT',

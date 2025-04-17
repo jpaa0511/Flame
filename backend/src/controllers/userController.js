@@ -18,13 +18,13 @@ const registerUser = async (req, res) => {
   } = req.body;
 
   try {
-    // Verificar si el usuario ya existe
+    // Check if the user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: 'El email ya está registrado' });
     }
 
-    // Hash de la contraseña
+    // Password hash
     const hashedPassword = await hashPassword(password);
 
     const newUser = new User({

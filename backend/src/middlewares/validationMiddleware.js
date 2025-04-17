@@ -66,7 +66,7 @@ const validateRegister = [
   }
 ];
 
-// Validación de login
+// Login validation
 const validateLogin = [
   body("email")
     .notEmpty()

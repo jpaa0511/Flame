@@ -6,7 +6,7 @@ const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Buscar usuario por email
+    // Search user by email
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(401).json({ 
@@ -14,7 +14,7 @@ const loginUser = async (req, res) => {
       });
     }
 
-    // Verificar contraseña
+    // Verify password
     const isMatch = await comparePassword(password, user.password);
     if (!isMatch) {
       return res.status(401).json({ 
@@ -22,7 +22,6 @@ const loginUser = async (req, res) => {
       });
     }
 
-    // Si todo es correcto, devolver datos básicos del usuario
     return res.status(200).json({
       user: {
         id: user._id,
