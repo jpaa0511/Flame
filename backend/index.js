@@ -11,9 +11,10 @@ const cors = require("cors");
 
 // Configure CORS
 app.use(cors({
-  origin: 'http://localhost:4000', // URL de tu frontend
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  origin: ['http://localhost:3000', 'http://localhost:3001'], // URLs permitidas
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
 }));
 
 // Import database connection function
