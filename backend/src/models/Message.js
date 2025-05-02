@@ -19,7 +19,7 @@ const MessageSchema = new Schema({
       validator: function(v) {
         return v && v.toString() !== this.sender.toString();
       },
-      message: 'El receptor no puede ser el mismo que el remitente'
+      message: 'The receiver cannot be the same as the sender' 
     }
   },
   content: {

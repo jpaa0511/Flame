@@ -3,59 +3,59 @@ const { body, validationResult } = require("express-validator");
 const validateRegister = [
   body("email")
     .notEmpty()
-    .withMessage("El email es requerido")
+    .withMessage("The email is required")
     .isEmail()
-    .withMessage("Formato de email inválido"),
+    .withMessage("Invalid email format"),
 
   body("password")
     .notEmpty()
-    .withMessage("La contraseña es requerida")
+    .withMessage("The password is required")
     .isLength({ min: 6 })
-    .withMessage("La contraseña debe tener al menos 6 caracteres"),
+    .withMessage("The password must be at least 6 characters long"),
 
   body("name")
     .notEmpty()
-    .withMessage("El nombre es requerido"),
+    .withMessage("The name is required"),
 
   body("age")
     .notEmpty()
-    .withMessage("La edad es requerida")
+    .withMessage("The age is required")
     .isInt({ min: 18, max: 100 })
-    .withMessage("La edad debe estar entre 18 y 100 años"),
+    .withMessage("The age must be between 18 and 100 years"),
 
   body("gender")
     .notEmpty()
-    .withMessage("El género es requerido")
+    .withMessage("The gender is required")
     .isIn(["male", "female", "other"])
-    .withMessage("El género debe ser 'male', 'female' u 'other'"),
+    .withMessage("The gender must be 'male', 'female' or 'other'"),
 
   body("department")
     .notEmpty()
-    .withMessage("El departamento es requerido"),
+    .withMessage("The department is required"),
 
   body("city")
     .notEmpty()
-    .withMessage("La ciudad es requerida"),
+    .withMessage("The city is required"),
 
   body("interests")
     .optional()
     .isArray()
-    .withMessage("Los intereses deben ser un array"),
+    .withMessage("The interests must be an array"),
 
   body("photos")
     .optional()
     .isArray()
-    .withMessage("Las fotos deben ser un array"),
+    .withMessage("The photos must be an array"),
 
   body("bio")
     .optional()
     .isString()
-    .withMessage("La biografía debe ser un texto"),
+    .withMessage("The biography must be a text"),
 
   body("preferences")
     .optional()
     .isObject()
-    .withMessage("Las preferencias deben ser un objeto"),
+    .withMessage("The preferences must be an object"),
 
   (req, res, next) => {
     const errors = validationResult(req);
@@ -70,13 +70,13 @@ const validateRegister = [
 const validateLogin = [
   body("email")
     .notEmpty()
-    .withMessage("El email es requerido")
+    .withMessage("The email is required")
     .isEmail()
-    .withMessage("Formato de email inválido"),
+    .withMessage("Invalid email format"),
 
   body("password")
     .notEmpty()
-    .withMessage("La contraseña es requerida"),
+    .withMessage("The password is required"),
 
   (req, res, next) => {
     const errors = validationResult(req);
@@ -91,15 +91,15 @@ const validateLogin = [
 const validateSwipe = [
   body("targetUserId")
     .notEmpty()
-    .withMessage("El ID del usuario objetivo es requerido")
+    .withMessage("The target user ID is required")
     .isMongoId()
-    .withMessage("ID de usuario inválido"),
+    .withMessage("Invalid user ID"),
 
   body("action")
     .notEmpty()
-    .withMessage("La acción es requerida")
+    .withMessage("The action is required")
     .isIn(["like", "dislike"])
-    .withMessage("La acción debe ser 'like' o 'dislike'"),
+    .withMessage("The action must be 'like' or 'dislike'"),
 
   (req, res, next) => {
     const errors = validationResult(req);

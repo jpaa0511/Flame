@@ -8,7 +8,7 @@ const getAvailableUsers = async (req, res) => {
     // Get current user preferences
     const currentUser = await User.findById(req.user.id);
     if (!currentUser) {
-      return errorResponse(res, 'Usuario no encontrado', 404);
+      return errorResponse(res, 'User not found', 404); 
     }
 
     // Build query based on user preferences
@@ -39,10 +39,10 @@ const getAvailableUsers = async (req, res) => {
       .select('-password -__v') // Exclude sensitive fields
       .limit(20); // Limit results
 
-    return successResponse(res, availableUsers, 'Usuarios disponibles obtenidos correctamente');
+    return successResponse(res, availableUsers, 'Available users obtained successfully');
 
   } catch (error) {
-    console.error('Error al obtener usuarios disponibles:', error);
+    console.error('Error in getAvailableUsers:', error);
     return errorResponse(res);
   }
 };
@@ -67,7 +67,7 @@ const registerUser = async (req, res) => {
     // Check if the user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return errorResponse(res, 'El email ya está registrado', 400);
+      return errorResponse(res, 'The email is already registered', 400); 
     }
 
     // Password hash

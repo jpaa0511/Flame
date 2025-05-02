@@ -2,19 +2,19 @@ const Message = require('../models/Message');
 const Match = require('../models/Match');
 const { successResponse, errorResponse } = require('../helpers/responseHelper');
 
-// Obtener el historial de mensajes entre dos usuarios
+// Get message history between two users
 const getChatHistory = async (req, res) => {
   try {
     const { matchId } = req.params;
 
-    // Verificar que el match existe
+    // Verify that the match exists
     const match = await Match.findOne({
       _id: matchId,
       isActive: true
     });
 
     if (!match) {
-      return errorResponse(res, 'Match no encontrado', 404);
+      return errorResponse(res, 'Match not found', 404);
     }
 
     const messages = await Message.find({
@@ -25,7 +25,7 @@ const getChatHistory = async (req, res) => {
 
     return successResponse(res, { messages });
   } catch (error) {
-    console.error('Error en getChatHistory:', error);
+    console.error('Error in getChatHistory:', error);
     return errorResponse(res, error.message);
   }
 };

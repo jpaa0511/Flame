@@ -10,13 +10,13 @@ const loginUser = async (req, res) => {
     // Search user by email
     const user = await User.findOne({ email });
     if (!user) {
-      return errorResponse(res, 'Email o contraseña incorrectos', 401);
+      return errorResponse(res, 'Incorrect email or password', 401);
     }
 
     // Verify password
     const isMatch = await comparePassword(password, user.password);
     if (!isMatch) {
-      return errorResponse(res, 'Email o contraseña incorrectos', 401);
+      return errorResponse(res, 'Incorrect email or password', 401);
     }
 
     // Generate JWT token
@@ -25,7 +25,7 @@ const loginUser = async (req, res) => {
     return authResponse(res, user, token);
 
   } catch (error) {
-    console.error('Error en login:', error);
+    console.error('Error in login:', error);
     return errorResponse(res);
   }
 };

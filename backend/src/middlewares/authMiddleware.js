@@ -22,7 +22,7 @@ const verifyToken = (req, res, next) => {
     const token = req.header('Authorization')?.replace('Bearer ', '');
     
     if (!token) {
-      return errorResponse(res, 'No se proporcionó token de autenticación', 401);
+      return errorResponse(res, 'No token provided', 401);
     }
 
     // Verify token
@@ -33,14 +33,14 @@ const verifyToken = (req, res, next) => {
     
     next();
   } catch (error) {
-    console.error('Error en verificación de token:', error);
-    return errorResponse(res, 'Token inválido o expirado', 401);
+    console.error('Error in token verification:', error);
+    return errorResponse(res, 'Invalid or expired token', 401);
   }
 };
 
 const authenticateToken = async (req, res, next) => {
   try {
-    // Obtener el token del header
+    // Get token from header
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
 
@@ -51,26 +51,26 @@ const authenticateToken = async (req, res, next) => {
       });
     }
 
-    // Verificar el token
+    // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // Buscar el usuario en la base de datos
+    // Search user in the database
     const user = await User.findById(decoded.id).select('-password');
     if (!user) {
       return res.status(401).json({
         success: false,
-        message: 'Usuario no encontrado'
+        message: 'User not found'
       });
     }
 
-    // Agregar el usuario al objeto request
+    // Add user to request object
     req.user = user;
     next();
   } catch (error) {
-    console.error('Error en autenticación:', error);
+    console.error('Error in authentication:', error);
     return res.status(401).json({
       success: false,
-      message: 'Token inválido o expirado'
+      message: 'Invalid or expired token'
     });
   }
 };
