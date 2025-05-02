@@ -1,5 +1,7 @@
 const User = require("../models/User");
+const Match = require("../models/Match");
 const { successResponse, errorResponse } = require("../helpers/responseHelper");
+const mongoose = require('mongoose');
 
 // Registrar un swipe (like o dislike)
 const registerSwipe = async (req, res) => {
@@ -18,7 +20,11 @@ const registerSwipe = async (req, res) => {
 
     if (action === 'like') {
       // Verificar si ya existe un match
-      if (currentUser.matches.includes(targetUserId)) {
+      const existingMatch = await Match.findOne({
+        users: { $all: [currentUserId, targetUserId] }
+      });
+
+      if (existingMatch) {
         return errorResponse(res, 'Ya existe un match con este usuario', 400);
       }
 
@@ -33,14 +39,15 @@ const registerSwipe = async (req, res) => {
 
       // Verificar si hay match
       if (targetUser.likes.includes(currentUserId)) {
-        // ¡Es un match!
-        currentUser.matches.push(targetUserId);
-        targetUser.matches.push(currentUserId);
-        await currentUser.save();
-        await targetUser.save();
+        // Crear un nuevo match
+        const newMatch = new Match({
+          users: [currentUserId, targetUserId]
+        });
+        await newMatch.save();
 
         return successResponse(res, {
           isMatch: true,
+          matchId: newMatch._id,
           message: '¡Es un match!',
           user: targetUser
         });
@@ -71,25 +78,83 @@ const registerSwipe = async (req, res) => {
   }
 };
 
-// Obtener matches del usuario
+/* Obtener matches del usuario - Esta funcion no sirve, el match debe de ser un modelo de datos, no una propiedad de los usuarios
 const getMatches = async (req, res) => {
   try {
     const currentUserId = req.user.id;
     
-    const currentUser = await User.findById(currentUserId)
-      .populate('matches', 'name age photos bio');
+    const matches = await Match.find({
+      users: currentUserId,
+      isActive: true
+    }).populate({
+      path: 'users',
+      select: 'name age photos bio',
+      match: { _id: { $ne: currentUserId } }
+    });
 
     return successResponse(res, {
-      matches: currentUser.matches
+      matches: matches.map(match => ({
+        matchId: match._id,
+        user: match.users[0],
+        lastMessage: match.lastMessage,
+        lastMessageAt: match.lastMessageAt
+      }))
     });
 
   } catch (error) {
     console.error('Error en getMatches:', error);
     return errorResponse(res);
   }
+};*/
+
+const getMatchesByUser = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    // Verificar que el ID es válido
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ 
+        message: 'ID de usuario no válido',
+        error: 'Invalid user ID format'
+      });
+    }
+
+    // Verificar que el usuario existe
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ 
+        message: 'Usuario no encontrado',
+        error: 'User not found'
+      });
+    }
+
+    // Buscar todos los matches activos donde el usuario está involucrado
+    const matches = await Match.find({
+      users: userId,
+      isActive: true
+    })
+    .populate({
+      path: 'users',
+      select: 'username profilePicture',
+      match: { _id: { $ne: userId } } // Excluir al usuario actual
+    })
+    .sort({ lastMessageAt: -1 }); // Ordenar por último mensaje
+
+    res.status(200).json({
+      message: 'Matches encontrados exitosamente',
+      matches
+    });
+  } catch (error) {
+    console.error('Error al obtener matches:', error);
+    res.status(500).json({ 
+      message: 'Error al obtener matches',
+      error: error.message 
+    });
+  }
 };
 
 module.exports = {
   registerSwipe,
-  getMatches
+  //getMatches,
+  getMatchesByUser
 };

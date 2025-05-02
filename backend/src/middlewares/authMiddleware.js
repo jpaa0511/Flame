@@ -2,6 +2,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { JWT_SECRET } = process.env;
 const { errorResponse } = require('../helpers/responseHelper');
+const User = require('../models/User');
 
 // Encrypt password
 const hashPassword = async (password) => {
@@ -37,8 +38,46 @@ const verifyToken = (req, res, next) => {
   }
 };
 
+const authenticateToken = async (req, res, next) => {
+  try {
+    // Obtener el token del header
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        message: 'Token no proporcionado'
+      });
+    }
+
+    // Verificar el token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    // Buscar el usuario en la base de datos
+    const user = await User.findById(decoded.id).select('-password');
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Usuario no encontrado'
+      });
+    }
+
+    // Agregar el usuario al objeto request
+    req.user = user;
+    next();
+  } catch (error) {
+    console.error('Error en autenticación:', error);
+    return res.status(401).json({
+      success: false,
+      message: 'Token inválido o expirado'
+    });
+  }
+};
+
 module.exports = {
   hashPassword,
   comparePassword,
-  verifyToken
+  verifyToken,
+  authenticateToken
 }; 

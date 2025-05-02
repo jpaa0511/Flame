@@ -87,10 +87,6 @@ const UserSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: 'User'
   }],
-  matches: [{
-    type: Schema.Types.ObjectId,
-    ref: 'User'
-  }],
   isRegistrationComplete: {
     type: Boolean,
     default: false,
