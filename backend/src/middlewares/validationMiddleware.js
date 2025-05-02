@@ -87,20 +87,27 @@ const validateLogin = [
   }
 ];
 
-// Validación de Matches
+// Validación de Swipes
 const validateSwipe = [
-  body("userId").notEmpty().withMessage("userId es requerido"),
-  body("targetUserId").notEmpty().withMessage("targetUserId es requerido"),
+  body("targetUserId")
+    .notEmpty()
+    .withMessage("El ID del usuario objetivo es requerido")
+    .isMongoId()
+    .withMessage("ID de usuario inválido"),
+
   body("action")
+    .notEmpty()
+    .withMessage("La acción es requerida")
     .isIn(["like", "dislike"])
-    .withMessage("action debe ser like o dislike"),
+    .withMessage("La acción debe ser 'like' o 'dislike'"),
+
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
     next();
-  },
+  }
 ];
 
 module.exports = { 
