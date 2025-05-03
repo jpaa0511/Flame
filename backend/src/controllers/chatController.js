@@ -25,7 +25,7 @@ const getChatHistory = async (req, res) => {
 
     return successResponse(res, { messages });
   } catch (error) {
-    console.error('Error in getChatHistory:', error);
+    //console.error('Error in getChatHistory:', error);
     return errorResponse(res, error.message);
   }
 };

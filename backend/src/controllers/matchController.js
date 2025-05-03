@@ -138,7 +138,7 @@ const getMatchesByUser = async (req, res) => {
       matches: matchedUsers
     });
   } catch (error) {
-    console.error('Error in getMatchesByUser:', error);
+    //console.error('Error in getMatchesByUser:', error);
     res.status(500).json({ 
       message: 'Error in getMatchesByUser',
       error: error.message 

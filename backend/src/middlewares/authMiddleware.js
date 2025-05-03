@@ -33,7 +33,7 @@ const verifyToken = (req, res, next) => {
     
     next();
   } catch (error) {
-    console.error('Error in token verification:', error);
+    //console.error('Error in token verification:', error);
     return errorResponse(res, 'Invalid or expired token', 401);
   }
 };
@@ -67,7 +67,7 @@ const authenticateToken = async (req, res, next) => {
     req.user = user;
     next();
   } catch (error) {
-    console.error('Error in authentication:', error);
+    //console.error('Error in authentication:', error);
     return res.status(401).json({
       success: false,
       message: 'Invalid or expired token'
