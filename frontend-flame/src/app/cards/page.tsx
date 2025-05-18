@@ -5,61 +5,91 @@ import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import ProfileCard from '@/components/ProfileCard';
 import { User } from '@/types/user';
+import BackButton from '@/components/BackButton';
+import HamburgerMenu from '@/components/HamburgerMenu';
 import { userService } from '@/services/userService';
 
-export default function Feed() {
+interface ExternalUser {
+  id: string;
+  name: string;
+  city: string;
+  age: number;
+  photo: string;
+}
+
+type RandomUser = {
+  login: { uuid: string };
+  name: { first: string; last: string };
+  location: { city: string };
+  dob: { age: number };
+  picture: { large: string };
+  // ...otros campos si los necesitas
+};
+
+export default function Cards() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<ExternalUser[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
-    const initializeFeed = async () => {
+    const initializeCards = async () => {
+      console.log('Initializing Cards page...');
       try {
         const userData = localStorage.getItem('user');
+        console.log('User data from localStorage:', userData);
+
         if (!userData || userData === 'undefined') {
-          router.push('/login');
+          setIsLoading(false);
           return;
         }
 
         let user: User;
         try {
           user = JSON.parse(userData);
+          console.log('Parsed user data:', user);
         } catch (error) {
           console.error('Error parsing user data:', error);
           localStorage.removeItem('user');
-          router.push('/login');
+          setIsLoading(false);
           return;
         }
 
         setCurrentUser(user);
+        console.log('Current user set:', user.name);
 
-        // Cargar usuarios solo si tenemos un usuario válido
-        if (user && user.city) {
-          try {
-            const { users: cityUsers } = await userService.getUsersByCity(user.city);
-            // Filtrar al usuario actual de la lista
-            const filteredUsers = cityUsers.filter((u: User) => u.id !== user.id);
-            setUsers(filteredUsers);
-          } catch (error) {
-            console.error('Error loading users:', error);
-          }
+        // Traer usuarios de una API externa
+        try {
+          const res = await fetch('https://randomuser.me/api/?results=20&nat=us,es,fr,br');
+          const data = await res.json();
+          const externalUsers: ExternalUser[] = data.results.map((u: RandomUser, idx: number) => ({
+            id: u.login.uuid || idx.toString(),
+            name: `${u.name.first} ${u.name.last}`,
+            city: u.location.city,
+            age: u.dob.age,
+            photo: u.picture.large
+          }));
+          setUsers(externalUsers);
+          console.log('External users loaded:', externalUsers.length);
+        } catch (error) {
+          console.error('Error loading external users:', error);
         }
       } catch (error) {
-        console.error('Error in feed initialization:', error);
+        console.error('Error in cards initialization:', error);
       } finally {
         setIsLoading(false);
       }
     };
 
-    initializeFeed();
+    initializeCards();
   }, [router]);
 
   const handleSwipe = async (direction: 'left' | 'right') => {
     if (!currentUser || currentIndex >= users.length) return;
 
     const targetUser = users[currentIndex];
+    console.log(`Swiping ${direction} on user:`, targetUser.name);
     
     try {
       if (direction === 'right') {
@@ -69,8 +99,26 @@ export default function Feed() {
       }
       
       setCurrentIndex(prev => prev + 1);
+      
+      // Si nos quedamos sin usuarios, cargar más
+      if (currentIndex + 1 >= users.length) {
+        try {
+          const res = await fetch('https://randomuser.me/api/?results=20&nat=us,es,fr,br');
+          const data = await res.json();
+          const newUsers: ExternalUser[] = data.results.map((u: RandomUser, idx: number) => ({
+            id: u.login.uuid || idx.toString(),
+            name: `${u.name.first} ${u.name.last}`,
+            city: u.location.city,
+            age: u.dob.age,
+            photo: u.picture.large
+          }));
+          setUsers(prev => [...prev, ...newUsers]);
+        } catch (error) {
+          console.error('Error loading more users:', error);
+        }
+      }
     } catch (error) {
-      console.error('Error al procesar el like/dislike:', error);
+      console.error('Error processing swipe:', error);
     }
   };
 
@@ -118,8 +166,10 @@ export default function Feed() {
   return (
     <div className="min-h-screen bg-gray-100">
       <Navbar />
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-md mx-auto">
+      <HamburgerMenu />
+      <BackButton to="/login" label="Volver al login" />
+      <div className="container mx-auto px-4 py-8 flex justify-center items-center min-h-[calc(100vh-4rem)]">
+        <div className="w-full max-w-md">
           {users[currentIndex] && (
             <ProfileCard
               user={users[currentIndex]}

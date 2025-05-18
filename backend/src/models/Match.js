@@ -27,9 +27,17 @@ const MatchSchema = new Schema({
   timestamps: true
 });
 
-// Compound index to ensure unique matches between two users
-// The order of users doesn't matter (user1-user2 is the same as user2-user1)
-MatchSchema.index({ user1: 1, user2: 1 }, { unique: true });
-MatchSchema.index({ user2: 1, user1: 1 }, { unique: true });
+MatchSchema.index({ user1: 1, user2: 1 });
+MatchSchema.index({ user2: 1, user1: 1 });
+
+MatchSchema.statics.findMatch = async function(user1Id, user2Id) {
+  return this.findOne({
+    $or: [
+      { user1: user1Id, user2: user2Id },
+      { user1: user2Id, user2: user1Id }
+    ],
+    isActive: true
+  });
+};
 
 module.exports = model('Match', MatchSchema); 

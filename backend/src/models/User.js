@@ -31,8 +31,9 @@ const UserSchema = new Schema({
   },
   department: {
     type: String,
-    required: true,
-    trim: true,
+    required: false,
+    default: '',
+    trim: true
   },
   city: {
     type: String,

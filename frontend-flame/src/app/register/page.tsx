@@ -1,14 +1,20 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import Link from 'next/link';
 import { userService } from '@/services/userService';
-import { User } from '@/types/user';
+import BackButton from '@/components/BackButton';
 
-type RegisterFormData = Omit<User, 'id'> & {
+type RegisterFormData = {
+  name: string;
+  email: string;
   password: string;
   confirmPassword: string;
+  age: string;
+  gender: string;
+  city: string;
 };
 
 export default function Register() {
@@ -17,78 +23,69 @@ export default function Register() {
     email: '',
     password: '',
     confirmPassword: '',
-    age: 18,
+    age: '',
     gender: '',
-    department: '',
-    city: '',
-    interests: [],
-    photos: [],
-    bio: '',
-    preferences: {
-      gender: '',
-      ageRange: {
-        min: 18,
-        max: 99
-      },
-      location: {
-        department: '',
         city: ''
-      }
-    }
   });
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    
-    if (name.includes('.')) {
-      const [parent, child] = name.split('.');
-      setFormData(prev => {
-        const newData = { ...prev };
-        if (parent === 'preferences') {
-          newData.preferences = {
-            ...prev.preferences,
-            [child]: value
-          };
-        }
-        return newData;
-      });
-    } else if (name === 'interests') {
-      const interests = value.split(',').map(interest => interest.trim());
-      setFormData(prev => ({
-        ...prev,
-        interests
-      }));
-    } else {
       setFormData(prev => ({
         ...prev,
         [name]: value
       }));
-    }
   };
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
+    // Validaciones
     if (formData.password !== formData.confirmPassword) {
       setError('Las contraseñas no coinciden');
+      return;
+    }
+
+    if (formData.password.length < 6) {
+      setError('La contraseña debe tener al menos 6 caracteres');
+      return;
+    }
+
+    if (parseInt(formData.age) < 18) {
+      setError('Debes ser mayor de 18 años');
       return;
     }
 
     setIsLoading(true);
 
     try {
-      const { user } = await userService.register(formData);
-      localStorage.setItem('user', JSON.stringify(user));
-      router.push('/feed');
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message);
+      const { name, email, password, age, gender, city } = formData;
+      const userToRegister = {
+        name,
+        email,
+        password,
+        age: parseInt(age),
+        gender,
+        city,
+        photos: [],
+        bio: '',
+        verified: false,
+        likes: [],
+        dislikes: []
+      };
+
+      console.log('Intentando registrar usuario:', { ...userToRegister, password: '****' });
+      await userService.register(userToRegister);
+      router.push('/login');
+    } catch (error: unknown) {
+      console.error('Error en registro:', error);
+      if (error instanceof Error) {
+        setError(error.message);
       } else {
-        setError('Ocurrió un error');
+        setError('Error al registrar usuario');
       }
     } finally {
       setIsLoading(false);
@@ -96,224 +93,181 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-50 flex items-center justify-center p-4">
-      <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">
+    <div className="min-h-screen bg-white flex flex-col">
+      <BackButton to="/" label="Ir al inicio" />
+      {/* Logo y Header */}
+      <div className="flex-1 flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8">
+        <div className="w-full max-w-md space-y-8">
+          <div className="text-center">
+            <Image
+              src="/flame-logo.png"
+              alt="Flame Logo"
+              width={200}
+              height={80}
+              className="mx-auto"
+            />
+            <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
             Crea tu cuenta
-          </h1>
-          <p className="text-gray-600">
-            Únete a nuestra comunidad
-          </p>
+            </h2>
         </div>
         
+          <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
         {error && (
-          <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded mb-6">
-            <p className="font-medium">{error}</p>
+              <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm">
+                {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="name" className="block text-sm font-medium text-gray-700">
                 Nombre completo
               </label>
               <input
+                  id="name"
+                  name="name"
                 type="text"
-                name="name"
+                  required
                 value={formData.name}
                 onChange={handleChange}
-                required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition text-gray-900 placeholder-gray-500"
+                  className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-full shadow-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-[#FE3C72] focus:border-[#FE3C72] text-base"
                 placeholder="Tu nombre"
               />
             </div>
+
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                 Correo electrónico
               </label>
               <input
+                  id="email"
+                  name="email"
                 type="email"
-                name="email"
+                  required
                 value={formData.email}
                 onChange={handleChange}
-                required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition text-gray-900 placeholder-gray-500"
-                placeholder="tu@email.com"
+                  className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-full shadow-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-[#FE3C72] focus:border-[#FE3C72] text-base"
+                  placeholder="ejemplo@correo.com"
               />
             </div>
+
+              <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Contraseña
-              </label>
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition text-gray-900 placeholder-gray-500"
-                placeholder="••••••••"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Confirmar contraseña
-              </label>
-              <input
-                type="password"
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition text-gray-900 placeholder-gray-500"
-                placeholder="••••••••"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="age" className="block text-sm font-medium text-gray-700">
                 Edad
               </label>
               <input
+                    id="age"
+                    name="age"
                 type="number"
-                name="age"
+                    required
+                    min="18"
+                    max="100"
                 value={formData.age}
                 onChange={handleChange}
-                required
-                min="18"
-                max="99"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition text-gray-900 placeholder-gray-500"
+                    className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-full shadow-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-[#FE3C72] focus:border-[#FE3C72] text-base"
+                    placeholder="18"
               />
             </div>
+
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="gender" className="block text-sm font-medium text-gray-700">
                 Género
               </label>
               <select
+                    id="gender"
                 name="gender"
+                    required
                 value={formData.gender}
                 onChange={handleChange}
-                required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition text-gray-900"
+                    className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-full shadow-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-[#FE3C72] focus:border-[#FE3C72] text-base"
               >
-                <option value="">Selecciona tu género</option>
+                    <option value="">Selecciona</option>
                 <option value="male">Masculino</option>
                 <option value="female">Femenino</option>
                 <option value="other">Otro</option>
               </select>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Departamento
-              </label>
-              <input
-                type="text"
-                name="department"
-                value={formData.department}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition text-gray-900 placeholder-gray-500"
-                placeholder="Tu departamento"
-              />
             </div>
+
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="city" className="block text-sm font-medium text-gray-700">
                 Ciudad
               </label>
               <input
+                  id="city"
+                  name="city"
                 type="text"
-                name="city"
+                  required
                 value={formData.city}
                 onChange={handleChange}
-                required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition text-gray-900 placeholder-gray-500"
+                  className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-full shadow-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-[#FE3C72] focus:border-[#FE3C72] text-base"
                 placeholder="Tu ciudad"
               />
             </div>
+
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Biografía
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                  Contraseña
               </label>
-              <textarea
-                name="bio"
-                value={formData.bio}
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  required
+                  value={formData.password}
                 onChange={handleChange}
-                required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition text-gray-900 placeholder-gray-500"
-                placeholder="Cuéntanos sobre ti"
-                rows={3}
+                  className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-full shadow-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-[#FE3C72] focus:border-[#FE3C72] text-base"
+                  placeholder="••••••••"
               />
             </div>
+
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Intereses
+                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
+                  Confirmar contraseña
               </label>
               <input
-                type="text"
-                name="interests"
-                value={formData.interests.join(', ')}
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type="password"
+                  required
+                  value={formData.confirmPassword}
                 onChange={handleChange}
-                required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition text-gray-900 placeholder-gray-500"
-                placeholder="Música, Deportes, Viajes, etc."
+                  className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-full shadow-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-[#FE3C72] focus:border-[#FE3C72] text-base"
+                  placeholder="••••••••"
               />
-              <p className="text-xs text-gray-500 mt-1">
-                Separa tus intereses con comas
-              </p>
+              </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Género preferido
-              </label>
-              <select
-                name="preferences.gender"
-                value={formData.preferences.gender}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition text-gray-900"
-              >
-                <option value="">Selecciona género preferido</option>
-                <option value="male">Masculino</option>
-                <option value="female">Femenino</option>
-                <option value="other">Otro</option>
-              </select>
-            </div>
-          </div>
 
-          <div className="pt-4">
+            <div>
             <button
               type="submit"
               disabled={isLoading}
-              className={`w-full py-3 px-4 rounded-lg text-white font-medium transition
-                ${isLoading 
-                  ? 'bg-gray-400 cursor-not-allowed' 
-                  : 'bg-indigo-600 hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2'
-                }`}
+                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-full shadow-sm text-base font-medium text-white bg-[#FE3C72] hover:bg-[#E62E5C] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FE3C72] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {isLoading ? (
-                <span className="flex items-center justify-center">
-                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Procesando...
-                </span>
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
               ) : (
-                'Registrarse'
+                  'Crear cuenta'
               )}
             </button>
           </div>
         </form>
 
-        <div className="mt-6 text-center">
+          <div className="text-center mt-4">
           <p className="text-sm text-gray-600">
             ¿Ya tienes una cuenta?{' '}
-            <Link href="/login" className="font-medium text-indigo-600 hover:text-indigo-500">
+              <Link href="/login" className="font-medium text-[#FE3C72] hover:text-[#E62E5C]">
               Inicia sesión
             </Link>
           </p>
         </div>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div className="py-4 text-center text-sm text-gray-500">
+        <p>© 2024 Flame. Todos los derechos reservados.</p>
       </div>
     </div>
   );
