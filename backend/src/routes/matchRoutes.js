@@ -4,8 +4,7 @@ const { validateSwipe } = require("../middlewares/validationMiddleware");
 const { verifyToken } = require("../middlewares/authMiddleware");
 const router = express.Router();
 
-// EndPoints con middleware
 router.post("/swipes", verifyToken, validateSwipe, registerSwipe);
-router.get("/:userId", getMatchesByUser);
+router.get("/matches-by-user", verifyToken, getMatchesByUser);
 
 module.exports = router;

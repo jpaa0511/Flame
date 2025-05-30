@@ -1,133 +1,116 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { User, getPotentialMatches } from '@/services/userService';
 import { useRouter } from 'next/navigation';
+import { authService } from '@/services/authService';
 import Navbar from '@/components/Navbar';
-import ProfileCard from '@/components/ProfileCard';
-import { User } from '@/types/user';
-import { userService } from '@/services/userService';
+import UserCard from '@/components/UserCard';
 
-export default function Feed() {
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
+export default function FeedPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
-    const initializeFeed = async () => {
+    const fetchUsers = async () => {
       try {
-        const userData = localStorage.getItem('user');
-        if (!userData || userData === 'undefined') {
+        setLoading(true);
+        setError(null);
+
+        if (!authService.isAuthenticated()) {
+          console.log('Usuario no autenticado, redirigiendo a login...');
           router.push('/login');
           return;
         }
 
-        let user: User;
-        try {
-          user = JSON.parse(userData);
-        } catch (error) {
-          console.error('Error parsing user data:', error);
-          localStorage.removeItem('user');
+        const response = await getPotentialMatches();
+        if (response.success) {
+          console.log('Usuarios obtenidos:', response.data);
+          setUsers(response.data);
+        } else {
+          throw new Error(response.message || 'Error al obtener usuarios');
+        }
+      } catch (error: any) {
+        console.error('Error al obtener usuarios:', error);
+        setError(error.message || 'Error al cargar los usuarios');
+        if (!authService.isAuthenticated()) {
           router.push('/login');
-          return;
         }
-
-        setCurrentUser(user);
-
-        // Cargar usuarios solo si tenemos un usuario válido
-        if (user && user.city) {
-          try {
-            const { users: cityUsers } = await userService.getUsersByCity(user.city);
-            // Filtrar al usuario actual de la lista
-            const filteredUsers = cityUsers.filter((u: User) => u.id !== user.id);
-            setUsers(filteredUsers);
-          } catch (error) {
-            console.error('Error loading users:', error);
-          }
-        }
-      } catch (error) {
-        console.error('Error in feed initialization:', error);
       } finally {
-        setIsLoading(false);
+        setLoading(false);
       }
     };
 
-    initializeFeed();
+    fetchUsers();
   }, [router]);
 
-  const handleSwipe = async (direction: 'left' | 'right') => {
-    if (!currentUser || currentIndex >= users.length) return;
-
-    const targetUser = users[currentIndex];
-    
-    try {
-      if (direction === 'right') {
-        await userService.likeUser(currentUser.id, targetUser.id);
-      } else {
-        await userService.dislikeUser(currentUser.id, targetUser.id);
-      }
-      
-      setCurrentIndex(prev => prev + 1);
-    } catch (error) {
-      console.error('Error al procesar el like/dislike:', error);
-    }
+  const handleLike = () => {
+    // TODO: Implementar lógica de like
+    setCurrentIndex(prev => prev + 1);
   };
 
-  if (isLoading) {
+  const handleDislike = () => {
+    // TODO: Implementar lógica de dislike
+    setCurrentIndex(prev => prev + 1);
+  };
+
+  if (loading) {
     return (
-      <div className="min-h-screen bg-gray-100">
+      <>
         <Navbar />
-        <div className="flex items-center justify-center h-[calc(100vh-4rem)]">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#FE3C72]"></div>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-pink-500"></div>
         </div>
-      </div>
+      </>
     );
   }
 
-  if (!users.length) {
+  if (error) {
     return (
-      <div className="min-h-screen bg-gray-100">
+      <>
         <Navbar />
-        <div className="flex flex-col items-center justify-center h-[calc(100vh-4rem)] p-4">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">¡No hay perfiles disponibles!</h2>
-          <p className="text-gray-600 text-center">
-            No encontramos perfiles en tu área en este momento.
-            Vuelve más tarde para ver nuevos perfiles.
-          </p>
+        <div className="flex flex-col items-center justify-center min-h-screen">
+          <h1 className="text-2xl font-bold text-red-500 mb-4">{error}</h1>
+          <button
+            onClick={() => router.push('/login')}
+            className="px-4 py-2 bg-pink-500 text-white rounded hover:bg-pink-600 transition-colors"
+          >
+            Volver a iniciar sesión
+          </button>
         </div>
-      </div>
+      </>
     );
   }
 
-  if (currentIndex >= users.length) {
+  if (users.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-100">
+      <>
         <Navbar />
-        <div className="flex flex-col items-center justify-center h-[calc(100vh-4rem)] p-4">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">¡No hay más perfiles!</h2>
-          <p className="text-gray-600 text-center">
-            Has visto todos los perfiles disponibles en tu área.
-            Vuelve más tarde para ver nuevos perfiles.
-          </p>
+        <div className="flex flex-col items-center justify-center min-h-screen">
+          <h1 className="text-2xl font-bold mb-4">No hay más perfiles para mostrar</h1>
+          <p className="text-gray-600">Vuelve más tarde para ver nuevos perfiles</p>
         </div>
-      </div>
+      </>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <>
       <Navbar />
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-md mx-auto">
-          {users[currentIndex] && (
-            <ProfileCard
+      <div className="min-h-screen bg-gray-100 py-8 pt-24">
+        <div className="container mx-auto px-4">
+          {currentIndex < users.length && (
+            <UserCard
               user={users[currentIndex]}
-              onSwipe={handleSwipe}
+              onLike={handleLike}
+              onDislike={handleDislike}
             />
           )}
         </div>
       </div>
-    </div>
+    </>
   );
 } 

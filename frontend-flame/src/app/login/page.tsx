@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { userService } from '@/services/userService';
+import { authService } from '@/services/authService';
 import Logo from '@/components/Logo';
 import BackButton from '@/components/BackButton';
 
@@ -11,38 +11,55 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
-    // Verificar si el usuario ya está logueado
-    const userData = localStorage.getItem('user');
-    if (userData && userData !== 'undefined') {
-      router.replace('/cards');
-    } else {
-      setIsLoading(false);
-    }
+    const checkAuth = async () => {
+      try {
+        // Verificar si el usuario ya está logueado
+        if (authService.isAuthenticated()) {
+          const user = await authService.getCurrentUser();
+          if (user) {
+            router.replace('/feed');
+            return;
+          }
+        }
+      } catch (error) {
+        console.error('Error al verificar autenticación:', error);
+      } finally {
+        setIsInitialLoading(false);
+      }
+    };
+
+    checkAuth();
   }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    setIsLoading(true);
+    setIsSubmitting(true);
 
     try {
-      await userService.login({ email, password });
-      router.replace('/cards');
+      const user = await authService.login({ email, password });
+      if (user) {
+        router.replace('/feed');
+      } else {
+        setError('Error al iniciar sesión');
+      }
     } catch (error: unknown) {
       if (error instanceof Error) {
         setError(error.message);
       } else {
         setError('Error al iniciar sesión');
       }
-      setIsLoading(false);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  if (isLoading) {
+  if (isInitialLoading) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#FE3C72]"></div>
@@ -83,6 +100,7 @@ export default function Login() {
                   onChange={(e) => setEmail(e.target.value)}
                   className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-full shadow-sm placeholder-gray-400 focus:outline-none focus:ring-[#FE3C72] focus:border-[#FE3C72] text-base"
                   placeholder="ejemplo@correo.com"
+                  disabled={isSubmitting}
                 />
               </div>
 
@@ -99,6 +117,7 @@ export default function Login() {
                   onChange={(e) => setPassword(e.target.value)}
                   className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-full shadow-sm placeholder-gray-400 focus:outline-none focus:ring-[#FE3C72] focus:border-[#FE3C72] text-base text-gray-900 caret-[#FE3C72]"
                   placeholder="••••••••"
+                  disabled={isSubmitting}
                 />
               </div>
             </div>
@@ -106,10 +125,10 @@ export default function Login() {
             <div>
               <button
                 type="submit"
-                disabled={isLoading}
+                disabled={isSubmitting}
                 className="w-full flex justify-center py-3 px-4 border border-transparent rounded-full shadow-sm text-base font-medium text-white bg-[#FE3C72] hover:bg-[#E62E5C] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FE3C72] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                {isLoading ? (
+                {isSubmitting ? (
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 ) : (
                   'Iniciar sesión'

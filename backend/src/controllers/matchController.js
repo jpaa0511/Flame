@@ -1,41 +1,85 @@
 const User = require("../models/User");
 const Match = require("../models/Match");
 const { successResponse, errorResponse } = require("../helpers/responseHelper");
-const mongoose = require('mongoose');
 
 const registerSwipe = async (req, res) => {
   try {
     const { targetUserId, action } = req.body;
     const currentUserId = req.user.id;
 
+    // Validación para evitar que un usuario interactúe consigo mismo
+    if (currentUserId === targetUserId) {
+      return errorResponse(res, 'No puedes interactuar contigo mismo', 400);
+    }
+
     const targetUser = await User.findById(targetUserId);
     if (!targetUser) {
-      return errorResponse(res, 'User not found', 404);
+      return errorResponse(res, 'Usuario no encontrado', 404);
     }
 
     const currentUser = await User.findById(currentUserId);
 
     if (action === 'like') {
       if (currentUser.likes.includes(targetUserId)) {
-        return errorResponse(res, 'You have already given like to this user', 400);
+        return errorResponse(res, 'Ya le diste like a este usuario', 400);
       }
 
+      // Agregar el like al usuario actual
       currentUser.likes.push(targetUserId);
       await currentUser.save();
 
+      // Verificar si hay match (si el otro usuario también dio like)
       if (targetUser.likes.includes(currentUserId)) {
-        const existingMatch = await Match.findMatch(currentUserId, targetUserId);
-        
+        // Verificar si ya existe un match entre estos usuarios
+        const existingMatch = await Match.findOne({
+          $or: [
+            { user1: currentUserId, user2: targetUserId },
+            { user1: targetUserId, user2: currentUserId }
+          ],
+          isActive: true
+        });
+
         if (!existingMatch) {
+          // Crear nuevo match
           const newMatch = new Match({
             user1: currentUserId,
             user2: targetUserId
           });
-          await newMatch.save();
 
+          try {
+            await newMatch.save();
+            return successResponse(res, {
+              isMatch: true,
+              matchId: newMatch._id,
+              message: '¡Es un match!',
+              user: targetUser
+            });
+          } catch (error) {
+            // Si hay un error de duplicado, verificar si el match existe
+            if (error.code === 11000) {
+              const match = await Match.findOne({
+                $or: [
+                  { user1: currentUserId, user2: targetUserId },
+                  { user1: targetUserId, user2: currentUserId }
+                ],
+                isActive: true
+              });
+
+              if (match) {
+                return successResponse(res, {
+                  isMatch: true,
+                  matchId: match._id,
+                  message: '¡Es un match!',
+                  user: targetUser
+                });
+              }
+            }
+            throw error;
+          }
+        } else {
           return successResponse(res, {
             isMatch: true,
-            matchId: newMatch._id,
+            matchId: existingMatch._id,
             message: '¡Es un match!',
             user: targetUser
           });
@@ -61,68 +105,48 @@ const registerSwipe = async (req, res) => {
     }
 
   } catch (error) {
-    console.error('Error in registerSwipe:', error);
+    console.error('Error en registerSwipe:', error);
     return errorResponse(res);
   }
 };
 
 const getMatchesByUser = async (req, res) => {
   try {
-    const { userId } = req.params;
+    const currentUserId = req.user.id;
 
-    if (!mongoose.Types.ObjectId.isValid(userId)) {
-      return res.status(400).json({ 
-        message: 'Formato de ID de usuario inválido',
-        error: 'Formato de ID de usuario inválido'
-      });
-    }
-
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({ 
-        message: 'Usuario no encontrado',
-        error: 'Usuario no encontrado'
-      });
-    }
-
+    // Buscar todos los matches donde el usuario actual es user1 o user2
     const matches = await Match.find({
       $or: [
-        { user1: userId },
-        { user2: userId }
+        { user1: currentUserId },
+        { user2: currentUserId }
       ],
       isActive: true
-    })
-    .populate({
-      path: 'user1 user2',
-      select: '_id email name photos bio age gender'
-    });
+    }).populate('user1 user2', 'name age gender photos bio interests');
 
-  
-    const matchedUsers = matches.map(match => {
-      const matchedUser = match.user1._id.toString() === userId ? match.user2 : match.user1;
+    // Transformar los matches para mostrar la información del otro usuario
+    const formattedMatches = matches.map(match => {
+      const otherUser = match.user1._id.toString() === currentUserId ? match.user2 : match.user1;
       return {
         matchId: match._id,
-        userId: matchedUser._id,
-        email: matchedUser.email,
-        name: matchedUser.name,
-        photos: matchedUser.photos,
-        bio: matchedUser.bio,
-        age: matchedUser.age,
-        gender: matchedUser.gender,
+        user: {
+          id: otherUser._id,
+          name: otherUser.name,
+          age: otherUser.age,
+          gender: otherUser.gender,
+          photos: otherUser.photos,
+          bio: otherUser.bio,
+          interests: otherUser.interests
+        },
         lastMessage: match.lastMessage,
         lastMessageAt: match.lastMessageAt
       };
     });
 
-    res.status(200).json({
-      message: 'Matches encontrados exitosamente',
-      matches: matchedUsers
-    });
+    return successResponse(res, formattedMatches, 'Matches obtenidos exitosamente');
+
   } catch (error) {
-    res.status(500).json({ 
-      message: 'Error al obtener matches',
-      error: error.message 
-    });
+    console.error('Error en getMatchesByUser:', error);
+    return errorResponse(res);
   }
 };
 

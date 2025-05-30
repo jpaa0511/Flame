@@ -6,6 +6,8 @@ const PORT = 3000;
 const express = require("express");
 const app = express();
 const http = require('http').createServer(app);
+const cors = require('cors');
+const cookieParser = require('cookie-parser');
 
 // Logging middleware
 app.use((req, res, next) => {
@@ -28,15 +30,17 @@ dbConnection();
 
 // Middleware to parse JSON
 app.use(express.json());
-const cors = require("cors");
 
-// CORS configuration
+// Configuración de CORS para cookies
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://localhost:3001'],
+  origin: ['http://localhost:4000', process.env.FRONTEND_URL].filter(Boolean),
+  credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
+// Middleware para parsear cookies
+app.use(cookieParser());
 
 // Body parsing logging middleware
 app.use((req, res, next) => {
@@ -54,11 +58,11 @@ const authRoutes = require("./src/routes/authRoutes");
 const matchRoutes = require("./src/routes/matchRoutes");
 const chatRoutes = require("./src/routes/chatRoutes");
 
-// API routes without /api prefix
-app.use("/auth", authRoutes);
-app.use("/users", userRoutes);
-app.use("/matches", matchRoutes);
-app.use("/chat", chatRoutes);
+// API routes without
+app.use("/api/auth", authRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/matches", matchRoutes);
+app.use("/api/chat", chatRoutes);
 
 // Documentation Swagger
 const swaggerUi = require("swagger-ui-express");

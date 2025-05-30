@@ -1,13 +1,23 @@
 export interface User {
-  id: string;
+  _id: string;
   name: string;
-  email: string;
   age: number;
+  email: string;
   gender: string;
+  department: string;
+  city: string;
+  interests: string[];
   photos: string[];
   bio: string;
-  verified: boolean;
-  city: string;
-  likes: string[];
-  dislikes: string[];
+  preferences: {
+    ageRange: {
+      min: number;
+      max: number;
+    };
+    location: {
+      department: string;
+      city: string;
+    };
+    gender: string;
+  };
 } 

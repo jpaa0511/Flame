@@ -16,68 +16,51 @@ const comparePassword = async (password, hash) => {
 };
 
 // Verify JWT Token
-const verifyToken = (req, res, next) => {
+const verifyToken = async (req, res, next) => {
   try {
-    // Get token from header
-    const token = req.header('Authorization')?.replace('Bearer ', '');
-    
+    const token = req.cookies.auth_token;
+
     if (!token) {
-      return errorResponse(res, 'No token provided', 401);
+      return errorResponse(res, 'No se proporcionó token de autenticación', 401);
     }
 
-    // Verify token
+    // Verificar el token
     const decoded = jwt.verify(token, JWT_SECRET);
-    
-    // Add user info to request
-    req.user = decoded;
-    
-    next();
-  } catch (error) {
-    //console.error('Error in token verification:', error);
-    return errorResponse(res, 'Invalid or expired token', 401);
-  }
-};
 
-const authenticateToken = async (req, res, next) => {
-  try {
-    // Get token from header
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
-
-    if (!token) {
-      return res.status(401).json({
-        success: false,
-        message: 'Token no proporcionado'
-      });
-    }
-
-    // Verify token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-    // Search user in the database
-    const user = await User.findById(decoded.id).select('-password');
+    // Buscar el usuario usando el ID correcto del payload
+    const user = await User.findById(decoded.userId).select('-password');
     if (!user) {
-      return res.status(401).json({
-        success: false,
-        message: 'User not found'
-      });
+      console.log('Token decodificado:', decoded); 
+      return errorResponse(res, 'Usuario no encontrado', 404);
     }
 
-    // Add user to request object
+    // Adjuntar el usuario al request
     req.user = user;
     next();
   } catch (error) {
-    //console.error('Error in authentication:', error);
-    return res.status(401).json({
-      success: false,
-      message: 'Invalid or expired token'
-    });
+    console.error('Error en verificación de token:', error);
+    if (error.name === 'JsonWebTokenError') {
+      return errorResponse(res, 'Token inválido', 401);
+    }
+    if (error.name === 'TokenExpiredError') {
+      return errorResponse(res, 'Token expirado', 401);
+    }
+    return errorResponse(res, 'Error de autenticación', 500);
   }
+};
+
+// Función para generar token JWT
+const generateToken = (user) => {
+  return jwt.sign(
+    { userId: user._id },
+    JWT_SECRET,
+    { expiresIn: '1h' }
+  );
 };
 
 module.exports = {
   hashPassword,
   comparePassword,
   verifyToken,
-  authenticateToken
+  generateToken
 }; 

@@ -1,32 +1,34 @@
 const User = require("../models/User");
-const { hashPassword } = require("../middlewares/authMiddleware");
-const { generateToken, errorResponse, authResponse, successResponse } = require("../helpers/responseHelper");
+const { successResponse, errorResponse } = require("../helpers/responseHelper");
 
-// Get available users for swiping
-const getAvailableUsers = async (req, res) => {
+const findPotentialMatches = async (req, res) => {
   try {
-    // Get current user preferences
     const currentUser = await User.findById(req.user.id);
     if (!currentUser) {
-      return errorResponse(res, 'User not found', 404); 
+      return errorResponse(res, 'Usuario no encontrado', 404);
     }
 
-    // Build query based on user preferences
+    console.log('Usuario actual:', {
+      id: currentUser._id,
+      gender: currentUser.gender,
+      age: currentUser.age,
+      preferences: currentUser.preferences
+    });
+
+    // Construir la consulta para encontrar usuarios que coincidan con las preferencias
     const query = {
-      _id: { $ne: req.user.id }, // Exclude current user
-      isRegistrationComplete: true,
+      _id: { $ne: req.user.id }, // Excluir al usuario actual
+      gender: currentUser.preferences.gender, // Género que busca el usuario actual
       age: {
         $gte: currentUser.preferences.ageRange.min,
         $lte: currentUser.preferences.ageRange.max
-      }
+      },
+      'preferences.gender': currentUser.gender, // El usuario debe estar interesado en el género del usuario actual
+      'preferences.ageRange.min': { $lte: currentUser.age }, // La edad mínima que busca debe ser menor o igual a la edad actual
+      'preferences.ageRange.max': { $gte: currentUser.age } // La edad máxima que busca debe ser mayor o igual a la edad actual
     };
 
-    // Add gender preference if specified
-    if (currentUser.preferences.gender !== 'any') {
-      query.gender = currentUser.preferences.gender;
-    }
-
-    // Add location preference if specified
+    // Agregar preferencias de ubicación si están especificadas
     if (currentUser.preferences.location.department) {
       query.department = currentUser.preferences.location.department;
     }
@@ -34,81 +36,29 @@ const getAvailableUsers = async (req, res) => {
       query.city = currentUser.preferences.location.city;
     }
 
-    // Get available users
-    const availableUsers = await User.find(query)
-      .select('-password -__v') // Exclude sensitive fields
-      .limit(20); // Limit results
+    // Excluir usuarios que ya han sido likeados o dislikeados
+    if (currentUser.likes.length > 0 || currentUser.dislikes.length > 0) {
+      query._id = {
+        $nin: [...currentUser.likes, ...currentUser.dislikes]
+      };
+    }
 
-    return successResponse(res, availableUsers, 'Available users obtained successfully');
+    console.log('Query de búsqueda:', JSON.stringify(query, null, 2));
+
+    const potentialMatches = await User.find(query)
+      .select('-password -__v')
+      .limit(20);
+
+    console.log('Matches encontrados:', potentialMatches.length);
+
+    return successResponse(res, potentialMatches, 'Posibles matches encontrados exitosamente');
 
   } catch (error) {
-    console.error('Error in getAvailableUsers:', error);
+    console.error('Error en findPotentialMatches:', error);
     return errorResponse(res);
   }
 };
 
-// Register User
-const registerUser = async (req, res) => {
-  const {
-    name,
-    age,
-    email,
-    gender,
-    department,
-    city,
-    interests,
-    photos,
-    bio,
-    preferences,
-    password
-  } = req.body;
-
-  try {
-    // Check if the user already exists
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return errorResponse(res, 'The email is already registered', 400); 
-    }
-
-    // Password hash
-    const hashedPassword = await hashPassword(password);
-
-    const newUser = new User({
-      name,
-      age,
-      email,
-      gender,
-      department,
-      city,
-      interests: interests || [],
-      photos: photos || [],
-      bio,
-      password: hashedPassword,
-      preferences: preferences || {
-        gender: "any",
-        ageRange: {
-          min: 18,
-          max: 99
-        },
-        location: {
-          department: "",
-          city: ""
-        }
-      }
-    });
-
-    const savedUser = await newUser.save();
-    const token = generateToken(savedUser);
-
-    return authResponse(res, savedUser, token);
-
-  } catch (error) {
-    console.log(error);
-    return errorResponse(res, 'Oops, something went wrong!', 400);
-  }
-};
-
 module.exports = { 
-  registerUser,
-  getAvailableUsers 
+  findPotentialMatches
 };

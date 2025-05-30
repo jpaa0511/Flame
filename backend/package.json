@@ -21,13 +21,16 @@
   },
   "homepage": "https://github.com/jpaa0511/Flame#readme",
   "dependencies": {
+    "@types/multer": "^1.4.12",
     "bcryptjs": "^3.0.2",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "express-validator": "^7.2.1",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.13.2",
+    "multer": "^2.0.0",
     "socket.io": "^4.8.1"
   },
   "devDependencies": {
