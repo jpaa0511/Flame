@@ -52,6 +52,9 @@ app.use((req, res, next) => {
 
 app.use(express.static('public'));
 
+// Exponer la carpeta uploads como estática
+app.use('/uploads', express.static('uploads'));
+
 // Routes
 const userRoutes = require("./src/routes/userRoutes");
 const authRoutes = require("./src/routes/authRoutes");

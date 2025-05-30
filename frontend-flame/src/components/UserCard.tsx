@@ -1,4 +1,5 @@
 import { User } from '@/services/userService';
+import { useState } from 'react';
 
 interface UserCardProps {
   user: User;
@@ -6,16 +7,58 @@ interface UserCardProps {
   onDislike: () => void;
 }
 
+function getPhotoUrl(photoPath: string) {
+  if (!photoPath) return '';
+  // Normaliza la ruta (cambia \ por /)
+  const normalized = photoPath.replace(/\\/g, '/');
+  // Si ya es una URL absoluta, la retorna
+  if (/^https?:\/\//.test(normalized)) return normalized;
+  // Si es relativa, la convierte a absoluta
+  return `http://localhost:3000/${normalized}`;
+}
+
 export default function UserCard({ user, onLike, onDislike }: UserCardProps) {
+  const [photoIndex, setPhotoIndex] = useState(0);
+  const totalPhotos = user.photos?.length || 0;
+
+  const handlePrevPhoto = () => {
+    setPhotoIndex((prev) => (prev > 0 ? prev - 1 : prev));
+  };
+  const handleNextPhoto = () => {
+    setPhotoIndex((prev) => (prev < totalPhotos - 1 ? prev + 1 : prev));
+  };
+
   return (
     <div className="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden">
       <div className="relative">
-        {user.photos && user.photos[0] && (
+        {user.photos && user.photos[photoIndex] && (
           <img
-            src={user.photos[0]}
+            src={getPhotoUrl(user.photos[photoIndex])}
             alt={`Foto de ${user.name}`}
             className="w-full h-96 object-cover"
           />
+        )}
+        {/* Flechas de navegación de fotos */}
+        {totalPhotos > 1 && (
+          <>
+            <button
+              onClick={handlePrevPhoto}
+              disabled={photoIndex === 0}
+              className={`absolute left-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/80 shadow border border-gray-200 hover:bg-gray-100 transition-colors z-10 ${photoIndex === 0 ? 'opacity-30 cursor-not-allowed' : ''}`}
+              aria-label="Foto anterior"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#FE3C72]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+            </button>
+            <button
+              onClick={handleNextPhoto}
+              disabled={photoIndex === totalPhotos - 1}
+              className={`absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/80 shadow border border-gray-200 hover:bg-gray-100 transition-colors z-10 ${photoIndex === totalPhotos - 1 ? 'opacity-30 cursor-not-allowed' : ''}`}
+              aria-label="Foto siguiente"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#FE3C72]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+            </button>
+            
+          </>
         )}
         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4">
           <h2 className="text-white text-2xl font-bold">{user.name}, {user.age}</h2>
