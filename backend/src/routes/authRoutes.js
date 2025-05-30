@@ -1,5 +1,5 @@
 const express = require("express");
-const { loginUser, registerUser, logoutUser } = require("../controllers/authController");
+const { loginUser, registerUser, logoutUser, checkEmailExists } = require("../controllers/authController");
 const { verifyToken } = require("../middlewares/authMiddleware");
 const { validateLogin, validateRegister } = require("../middlewares/validationMiddleware");
 const { upload } = require("../middlewares/uploadMiddleware");
@@ -34,5 +34,8 @@ router.get("/constants", (req, res) => {
     }
   });
 });
+
+// Verificar si el email ya existe
+router.get("/check-email", checkEmailExists);
 
 module.exports = router;

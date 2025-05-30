@@ -31,8 +31,10 @@ class AuthService {
     this.token = token;
     if (token) {
       localStorage.setItem('token', token);
+      setAuthCookie(token);
     } else {
       localStorage.removeItem('token');
+      setAuthCookie(null);
     }
   }
 
@@ -119,6 +121,26 @@ class AuthService {
     }
     return this.token;
   }
+
+  async checkEmailExists(email: string): Promise<boolean> {
+    try {
+      const response = await api.get<{ exists: boolean }>(`/auth/check-email?email=${encodeURIComponent(email)}`);
+      return response.data.exists;
+    } catch (error) {
+      return false;
+    }
+  }
 }
 
-export const authService = new AuthService(); 
+export const authService = new AuthService();
+
+// Función utilitaria para manejar la cookie del token
+function setAuthCookie(token: string | null) {
+  if (typeof document !== 'undefined') {
+    if (token) {
+      document.cookie = `auth_token=${token}; path=/;`;
+    } else {
+      document.cookie = 'auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+    }
+  }
+} 

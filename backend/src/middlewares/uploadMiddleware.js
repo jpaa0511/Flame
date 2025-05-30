@@ -30,7 +30,7 @@ const upload = multer({
     }
     cb(null, true);
   }
-}).array('photos', 5);
+}).array('photos', 3);
 
 // Middleware para manejar errores de multer
 const handleMulterError = (err, req, res, next) => {
@@ -44,7 +44,7 @@ const handleMulterError = (err, req, res, next) => {
     if (err.code === 'LIMIT_FILE_COUNT') {
       return res.status(400).json({
         success: false,
-        message: 'Demasiados archivos. Máximo 5 fotos permitidas.'
+        message: 'Demasiados archivos. Máximo 3 fotos permitidas.'
       });
     }
     return res.status(400).json({

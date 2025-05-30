@@ -174,4 +174,18 @@ const logoutUser = (req, res) => {
   });
 };
 
-module.exports = { loginUser, registerUser, logoutUser };
+// Verificar si el email ya existe
+const checkEmailExists = async (req, res) => {
+  try {
+    const { email } = req.query;
+    if (!email) {
+      return res.status(400).json({ exists: false, message: 'Email requerido' });
+    }
+    const user = await User.findOne({ email });
+    return res.json({ exists: !!user });
+  } catch (error) {
+    return res.status(500).json({ exists: false, message: 'Error al verificar email' });
+  }
+};
+
+module.exports = { loginUser, registerUser, logoutUser, checkEmailExists };
