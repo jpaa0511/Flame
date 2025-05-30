@@ -48,12 +48,10 @@ export default function FeedPage() {
   }, [router]);
 
   const handleLike = () => {
-    // TODO: Implementar lógica de like
     setCurrentIndex((prev) => prev + 1);
   };
 
   const handleDislike = () => {
-    // TODO: Implementar lógica de dislike
     setCurrentIndex((prev) => prev + 1);
   };
 
@@ -85,7 +83,7 @@ export default function FeedPage() {
     );
   }
 
-  if (users.length === 0) {
+  if (users.length === 0 || currentIndex >= users.length) {
     return (
       <>
         <Navbar />
@@ -107,30 +105,12 @@ export default function FeedPage() {
       <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-8 pt-24">
         <div className="container mx-auto px-4 flex flex-col items-center">
           {currentIndex < users.length && (
-            <div className="relative w-full max-w-xl">
-              {/* Flecha izquierda */}
-              <button
-                onClick={() => setCurrentIndex((prev) => Math.max(prev - 1, 0))}
-                disabled={currentIndex === 0}
-                className={`absolute left-[-48px] top-1/2 -translate-y-1/2 p-2 rounded-full bg-white shadow-md border border-gray-200 hover:bg-gray-100 transition-colors z-10 ${currentIndex === 0 ? 'opacity-30 cursor-not-allowed' : ''}`}
-                aria-label="Anterior"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-[#FE3C72]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
-              </button>
+            <div className="w-full max-w-xl">
               <UserCard
                 user={users[currentIndex]}
                 onLike={handleLike}
                 onDislike={handleDislike}
               />
-              {/* Flecha derecha */}
-              <button
-                onClick={() => setCurrentIndex((prev) => Math.min(prev + 1, users.length - 1))}
-                disabled={currentIndex === users.length - 1}
-                className={`absolute right-[-48px] top-1/2 -translate-y-1/2 p-2 rounded-full bg-white shadow-md border border-gray-200 hover:bg-gray-100 transition-colors z-10 ${currentIndex === users.length - 1 ? 'opacity-30 cursor-not-allowed' : ''}`}
-                aria-label="Siguiente"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-[#FE3C72]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-              </button>
             </div>
           )}
         </div>

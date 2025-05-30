@@ -3,15 +3,22 @@ import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
   const token = request.cookies.get('auth_token')?.value;
-  const isAuthPage = request.nextUrl.pathname.startsWith('/login') || 
-                    request.nextUrl.pathname.startsWith('/register');
+  const pathname = request.nextUrl.pathname;
 
-  // Si no hay token y no estamos en una página de auth, redirigir a login
-  if (!token && !isAuthPage) {
+  const isAuthPage = pathname.startsWith('/login') || pathname.startsWith('/register');
+
+  // Si el usuario tiene sesión y va a la página de inicio (/) lo redirigimos a /feed
+  if (token && pathname === '/') {
+    return NextResponse.redirect(new URL('/feed', request.url));
+  }
+
+  // Si no hay sesión y va a una ruta protegida, redirigir a /login
+  const isProtectedRoute = pathname.startsWith('/feed');
+  if (!token && isProtectedRoute) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
 
-  // Si hay token y estamos en una página de auth, redirigir a feed
+  // Si hay sesión y va a login o register, redirigir a /feed
   if (token && isAuthPage) {
     return NextResponse.redirect(new URL('/feed', request.url));
   }
@@ -19,7 +26,8 @@ export function middleware(request: NextRequest) {
   return NextResponse.next();
 }
 
-// Configurar las rutas que deben ser protegidas
+// Configura las rutas que serán evaluadas por el middleware
 export const config = {
-  matcher: ['/feed/:path*', '/login', '/register']
-}; 
+  matcher: ['/', '/feed/:path*', '/login', '/register']
+};
+

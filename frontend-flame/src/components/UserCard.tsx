@@ -1,5 +1,6 @@
 import { User } from '@/services/userService';
 import { useState } from 'react';
+import { registerSwipe } from '@/services/userService';
 
 interface UserCardProps {
   user: User;
@@ -20,6 +21,9 @@ function getPhotoUrl(photoPath: string) {
 export default function UserCard({ user, onLike, onDislike }: UserCardProps) {
   const [photoIndex, setPhotoIndex] = useState(0);
   const totalPhotos = user.photos?.length || 0;
+  const [showMatchModal, setShowMatchModal] = useState(false);
+  const [matchedUserName, setMatchedUserName] = useState<string | null>(null);
+  const [pendingLike, setPendingLike] = useState(false);
 
   const handlePrevPhoto = () => {
     setPhotoIndex((prev) => (prev > 0 ? prev - 1 : prev));
@@ -28,8 +32,59 @@ export default function UserCard({ user, onLike, onDislike }: UserCardProps) {
     setPhotoIndex((prev) => (prev < totalPhotos - 1 ? prev + 1 : prev));
   };
 
+  const handleLikeClick = async () => {
+    try {
+      const res: any = await registerSwipe(user._id as string, 'like');
+      console.log('Respuesta de registerSwipe:', res);
+      if (res && res.data && res.data.isMatch) {
+        console.log('¡MATCH DETECTADO!', res.data);
+        setMatchedUserName(res.data.user?.name || user.name);
+        setShowMatchModal(true);
+        setPendingLike(true);
+        setTimeout(() => {
+          setShowMatchModal(false);
+          setPendingLike(false);
+          onLike();
+        }, 2500);
+        return;
+      }
+      onLike();
+    } catch (e) {
+      alert('Error al registrar like');
+    }
+  };
+  const handleDislikeClick = async () => {
+    try {
+      await registerSwipe(user._id as string, 'dislike');
+      onDislike();
+    } catch (e) {
+      alert('Error al registrar dislike');
+    }
+  };
+
   return (
     <div className="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden">
+      {/* Modal de match */}
+      {showMatchModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/30 backdrop-blur-md">
+          <div className="bg-white rounded-2xl shadow-lg p-8 flex flex-col items-center relative animate-fade-in">
+            <button
+              className="absolute top-2 right-2 text-gray-400 hover:text-gray-700 text-xl"
+              onClick={() => { setShowMatchModal(false); if (pendingLike) { setPendingLike(false); onLike(); } }}
+              aria-label="Cerrar"
+            >
+              ×
+            </button>
+            <div className="mb-4 animate-bounce">
+              <svg className="w-16 h-16 text-[#FE3C72]" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41 0.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+              </svg>
+            </div>
+            <h2 className="text-2xl font-bold text-[#FE3C72] mb-2">¡Es un match!</h2>
+            <p className="text-gray-700 text-lg">Ahora puedes chatear con <span className="font-semibold">{matchedUserName}</span></p>
+          </div>
+        </div>
+      )}
       <div className="relative">
         {user.photos && user.photos[photoIndex] && (
           <img
@@ -85,7 +140,7 @@ export default function UserCard({ user, onLike, onDislike }: UserCardProps) {
 
         <div className="flex justify-center space-x-4 mt-4">
           <button
-            onClick={onDislike}
+            onClick={handleDislikeClick}
             className="p-4 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -93,7 +148,7 @@ export default function UserCard({ user, onLike, onDislike }: UserCardProps) {
             </svg>
           </button>
           <button
-            onClick={onLike}
+            onClick={handleLikeClick}
             className="p-4 rounded-full bg-pink-500 hover:bg-pink-600 transition-colors"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">

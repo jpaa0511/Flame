@@ -1,4 +1,5 @@
 import api from '../lib/axios';
+import { authService } from './authService';
 
 export interface User {
   _id: string;
@@ -41,6 +42,25 @@ export const getPotentialMatches = async () => {
     return response.data;
   } catch (error) {
     console.error('Error al obtener usuarios potenciales:', error);
+    throw error;
+  }
+};
+
+export const registerSwipe = async (targetUserId: string, action: 'like' | 'dislike') => {
+  try {
+    const token = authService.getToken();
+    const response = await api.post(
+      '/matches/swipes',
+      { targetUserId, action },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error al registrar swipe:', error);
     throw error;
   }
 };
