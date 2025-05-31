@@ -11,7 +11,6 @@ export default function Home() {
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       <Navbar />
 
-      {/* Hero Section */}
       <div className="relative pt-22 bg-[#FFFFFF]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-[#FFFFFF]">
           <div className="text-center">
@@ -37,7 +36,6 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Features Section */}
       <div className="pt-12 pb-12 bg-[#FFFFFF]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-[#FFFFFF]">
           <div className="lg:text-center">
@@ -51,7 +49,7 @@ export default function Home() {
 
           <div className="mt-10">
             <div className="space-y-10 md:space-y-0 md:grid md:grid-cols-3 md:gap-x-8 md:gap-y-10">
-              {/* Feature 1 */}
+
               <div className="relative">
                 <div className="absolute flex items-center justify-center h-12 w-12 rounded-full bg-[#FE3C72] text-white">
                   <svg
@@ -80,7 +78,6 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Feature 2 */}
               <div className="relative">
                 <div className="absolute flex items-center justify-center h-12 w-12 rounded-full bg-[#FE3C72] text-white">
                   <svg
@@ -109,7 +106,6 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Feature 3 */}
               <div className="relative">
                 <div className="absolute flex items-center justify-center h-12 w-12 rounded-full bg-[#FE3C72] text-white">
                   <svg
@@ -141,7 +137,6 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Footer */}
       <footer className="bg-gray-50">
         <div className="max-w-7xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
           <div className="text-center text-gray-500 text-sm">

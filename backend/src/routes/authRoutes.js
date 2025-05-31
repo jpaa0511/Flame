@@ -5,16 +5,14 @@ const { validateLogin, validateRegister } = require("../middlewares/validationMi
 const { upload } = require("../middlewares/uploadMiddleware");
 const router = express.Router();
 
-// Login endpoint
 router.post("/login", validateLogin, loginUser);
 
-// Register endpoint
 router.post("/register", upload, validateRegister, registerUser);
 
-// Logout endpoint
+router.get("/check-email", checkEmailExists);
+
 router.post("/logout", logoutUser);
 
-// Verificar estado de autenticación
 router.get("/me", verifyToken, (req, res) => {
   res.status(200).json({
     success: true,
@@ -22,7 +20,6 @@ router.get("/me", verifyToken, (req, res) => {
   });
 });
 
-// Obtener constantes para el registro
 router.get("/constants", (req, res) => {
   const { INTERESTS, DEPARTMENTS, GENDERS } = require('../constants');
   res.json({
@@ -34,8 +31,5 @@ router.get("/constants", (req, res) => {
     }
   });
 });
-
-// Verificar si el email ya existe
-router.get("/check-email", checkEmailExists);
 
 module.exports = router;

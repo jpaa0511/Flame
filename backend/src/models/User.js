@@ -1,6 +1,5 @@
 const { Schema, model } = require("mongoose");
 
-// Expresión regular básica para validar emails
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const UserSchema = new Schema({
@@ -115,11 +114,10 @@ const UserSchema = new Schema({
     ref: 'User'
   }]
 }, {
-  timestamps: true, // ✅ Agrega createdAt y updatedAt automáticamente
-  versionKey: false  // ❌ Oculta el campo __v
+  timestamps: true,
+  versionKey: false 
 });
 
-// Middleware para actualizar `updatedAt` manualmente si fuera necesario
 UserSchema.pre('save', function(next) {
   this.updatedAt = Date.now();
   next();

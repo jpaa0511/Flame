@@ -49,7 +49,6 @@ const verifyToken = async (req, res, next) => {
   }
 };
 
-// Función para generar token JWT
 const generateToken = (user) => {
   return jwt.sign(
     { userId: user._id },

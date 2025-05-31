@@ -5,7 +5,6 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
-// Configuración de multer para subir fotos
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     const uploadDir = 'uploads/photos';
@@ -35,36 +34,30 @@ const upload = multer({
   }
 }).array('photos', 5);
 
-// Login User
 const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Search user by email
     const user = await User.findOne({ email }).select('+password');
     if (!user) {
       return errorResponse(res, 'Usuario no registrado', 404);
     }
 
-    // Verify password
     const isMatch = await comparePassword(password, user.password);
     if (!isMatch) {
       return errorResponse(res, 'Contraseña incorrecta', 401);
     }
 
-    // Generate JWT token
     const token = generateToken(user);
 
-    // Configurar la cookie segura
     res.cookie('auth_token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 24 * 60 * 60 * 1000, // 24 horas
+      maxAge: 24 * 60 * 60 * 1000,
       path: '/'
     });
 
-    // Enviar respuesta con el token en el cuerpo
     return res.status(200).json({
       success: true,
       token: token,
@@ -75,36 +68,28 @@ const loginUser = async (req, res) => {
       }
     });
 
-    console.log(token);
-
   } catch (error) {
     console.error('Error en login:', error);
     return errorResponse(res);
   }
 };
 
-// Register User
 const registerUser = async (req, res) => {
   try {
     const { email, password, name, age, gender, city, department, interests, preferences, bio } = req.body;
 
-    // Check if user exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return errorResponse(res, 'El correo ya está registrado', 409);
     }
 
-    // Hash password
     const hashedPassword = await hashPassword(password);
 
-    // Procesar las fotos subidas
     const photos = req.files ? req.files.map(file => file.path) : [];
 
-    // Parsear los campos JSON
     const parsedInterests = typeof interests === 'string' ? JSON.parse(interests) : interests;
     const parsedPreferences = typeof preferences === 'string' ? JSON.parse(preferences) : preferences;
 
-    // Create user
     const user = new User({
       name,
       email,
@@ -132,10 +117,8 @@ const registerUser = async (req, res) => {
 
     await user.save();
 
-    // Generate token
     const token = generateToken(user);
 
-    // Set cookie
     res.cookie('auth_token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -144,8 +127,9 @@ const registerUser = async (req, res) => {
       path: '/'
     });
 
-    return res.status(201).json({
+    return res.status(200).json({
       success: true,
+      token: token,
       user: {
         _id: user._id,
         name: user.name,
@@ -159,8 +143,8 @@ const registerUser = async (req, res) => {
   }
 };
 
-// Logout User
 const logoutUser = (req, res) => {
+  
   res.clearCookie('auth_token', {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
@@ -174,7 +158,6 @@ const logoutUser = (req, res) => {
   });
 };
 
-// Verificar si el email ya existe
 const checkEmailExists = async (req, res) => {
   try {
     const { email } = req.query;

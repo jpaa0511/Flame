@@ -1,7 +1,5 @@
 const express = require("express");
-const {
-  findPotentialMatches
-} = require("../controllers/userController");
+const { findPotentialMatches } = require("../controllers/userController");
 const { verifyToken } = require("../middlewares/authMiddleware");
 const router = express.Router();
 

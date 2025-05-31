@@ -10,7 +10,6 @@ module.exports = function(io) {
       const { matchId, userId } = data;
       
       try {
-        // Verificar que el match existe y el usuario es parte de él
         const match = await Match.findOne({
           _id: matchId,
           $or: [
@@ -29,7 +28,6 @@ module.exports = function(io) {
         socket.join(matchId);
         console.log(`Usuario ${userId} se unió al chat ${matchId}`);
 
-        // Cargar historial de mensajes
         const messages = await Message.find({ match: matchId })
           .sort({ createdAt: 1 })
           .populate('sender', 'email name')
@@ -52,7 +50,6 @@ module.exports = function(io) {
       try {
         const { matchId, senderId, content } = data;
 
-        // Verificar que el match existe y el usuario es parte de él
         const match = await Match.findOne({
           _id: matchId,
           $or: [
@@ -68,16 +65,13 @@ module.exports = function(io) {
           return;
         }
 
-        // Determinar el receptor
         const receiverId = match.user1._id.toString() === senderId ? match.user2._id : match.user1._id;
 
-        // Obtener información del emisor y receptor
         const [sender, receiver] = await Promise.all([
           User.findById(senderId).select('email name'),
           User.findById(receiverId).select('email name')
         ]);
 
-        // Crear y guardar el mensaje
         const message = new Message({
           match: matchId,
           sender: senderId,
@@ -86,12 +80,10 @@ module.exports = function(io) {
         });
         await message.save();
 
-        // Actualizar el último mensaje en el match
         match.lastMessage = content;
         match.lastMessageAt = new Date();
         await match.save();
 
-        // Emitir el mensaje a todos en la sala
         const messageData = {
           _id: message._id,
           match: matchId,

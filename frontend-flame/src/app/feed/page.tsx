@@ -29,7 +29,7 @@ export default function FeedPage() {
         const response = await getPotentialMatches();
         if (response.success) {
           console.log("Usuarios obtenidos:", response.data);
-          setUsers(response.data);
+        setUsers(response.data);
         } else {
           throw new Error(response.message || "Error al obtener usuarios");
         }
@@ -59,9 +59,9 @@ export default function FeedPage() {
     return (
       <>
         <Navbar />
-        <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-screen">
           <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-pink-500"></div>
-        </div>
+      </div>
       </>
     );
   }
@@ -70,15 +70,15 @@ export default function FeedPage() {
     return (
       <>
         <Navbar />
-        <div className="flex flex-col items-center justify-center min-h-screen">
-          <h1 className="text-2xl font-bold text-red-500 mb-4">{error}</h1>
-          <button
+      <div className="flex flex-col items-center justify-center min-h-screen">
+        <h1 className="text-2xl font-bold text-red-500 mb-4">{error}</h1>
+        <button
             onClick={() => router.push("/login")}
             className="px-4 py-2 bg-pink-500 text-white rounded hover:bg-pink-600 transition-colors"
-          >
-            Volver a iniciar sesión
-          </button>
-        </div>
+        >
+          Volver a iniciar sesión
+        </button>
+      </div>
       </>
     );
   }
@@ -94,7 +94,7 @@ export default function FeedPage() {
           <p className="text-gray-700">
             Vuelve más tarde para ver nuevos perfiles
           </p>
-        </div>
+      </div>
       </>
     );
   }
@@ -104,17 +104,17 @@ export default function FeedPage() {
       <Navbar />
       <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-8 pt-24">
         <div className="container mx-auto px-4 flex flex-col items-center">
-          {currentIndex < users.length && (
+        {currentIndex < users.length && (
             <div className="w-full max-w-xl">
-              <UserCard
-                user={users[currentIndex]}
-                onLike={handleLike}
-                onDislike={handleDislike}
-              />
+          <UserCard
+            user={users[currentIndex]}
+            onLike={handleLike}
+            onDislike={handleDislike}
+          />
             </div>
-          )}
-        </div>
+        )}
       </div>
+    </div>
     </>
   );
-}
+} 

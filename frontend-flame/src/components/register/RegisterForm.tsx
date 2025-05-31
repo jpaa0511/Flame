@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { INTERESTS, DEPARTMENTS, GENDERS } from '@/constants';
+import { INTERESTS, DEPARTMENTS, GENDERS } from '@/constants/constantUser';
 import { authService } from '@/services/authService';
 import type { FormData as FormDataType } from '@/types';
 import toast from 'react-hot-toast';
@@ -173,7 +173,6 @@ const RegisterForm = () => {
     }));
   };
 
-  // Nuevo handler para rc-slider
   const handleAgeRangeSlider = (values: [number, number]) => {
     setFormData(prev => ({
       ...prev,
@@ -285,7 +284,7 @@ const RegisterForm = () => {
 
       if (response.success) {
         toast.success('Registro exitoso');
-        // Login automático tras registro
+
         try {
           const user = await authService.login({ email: formData.email, password: formData.password });
           if (user) {
@@ -293,7 +292,7 @@ const RegisterForm = () => {
             return;
           }
         } catch (e) {
-          // Si falla el login, redirige a login como fallback
+
           router.push('/login');
           return;
         }
@@ -307,13 +306,12 @@ const RegisterForm = () => {
   };
 
   const renderStepContent = (step: number) => {
-    // Calculate the left and right positions for the filled part of the range
+
     const minAge = 18;
     const maxAge = 99;
     const range = maxAge - minAge;
     const leftFill = ((formData.preferences.ageRange.min - minAge) / range) * 100;
     const rightFill = 100 - ((formData.preferences.ageRange.max - minAge) / range) * 100;
-
 
     switch (step) {
       case 0:

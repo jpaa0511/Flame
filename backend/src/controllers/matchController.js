@@ -7,7 +7,6 @@ const registerSwipe = async (req, res) => {
     const { targetUserId, action } = req.body;
     const currentUserId = req.user.id;
 
-    // Validación para evitar que un usuario interactúe consigo mismo
     if (currentUserId === targetUserId) {
       return errorResponse(res, 'No puedes interactuar contigo mismo', 400);
     }
@@ -24,13 +23,10 @@ const registerSwipe = async (req, res) => {
         return errorResponse(res, 'Ya le diste like a este usuario', 400);
       }
 
-      // Agregar el like al usuario actual
       currentUser.likes.push(targetUserId);
       await currentUser.save();
 
-      // Verificar si hay match (si el otro usuario también dio like)
       if (targetUser.likes.includes(currentUserId)) {
-        // Verificar si ya existe un match entre estos usuarios
         const existingMatch = await Match.findOne({
           $or: [
             { user1: currentUserId, user2: targetUserId },
@@ -40,7 +36,6 @@ const registerSwipe = async (req, res) => {
         });
 
         if (!existingMatch) {
-          // Crear nuevo match
           const newMatch = new Match({
             user1: currentUserId,
             user2: targetUserId
@@ -55,7 +50,6 @@ const registerSwipe = async (req, res) => {
               user: targetUser
             });
           } catch (error) {
-            // Si hay un error de duplicado, verificar si el match existe
             if (error.code === 11000) {
               const match = await Match.findOne({
                 $or: [
@@ -114,7 +108,6 @@ const getMatchesByUser = async (req, res) => {
   try {
     const currentUserId = req.user.id;
 
-    // Buscar todos los matches donde el usuario actual es user1 o user2
     const matches = await Match.find({
       $or: [
         { user1: currentUserId },
@@ -123,7 +116,6 @@ const getMatchesByUser = async (req, res) => {
       isActive: true
     }).populate('user1 user2', 'name age gender photos bio interests');
 
-    // Transformar los matches para mostrar la información del otro usuario
     const formattedMatches = matches.map(match => {
       const otherUser = match.user1._id.toString() === currentUserId ? match.user2 : match.user1;
       return {

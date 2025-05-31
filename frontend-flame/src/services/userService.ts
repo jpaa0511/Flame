@@ -64,3 +64,18 @@ export const registerSwipe = async (targetUserId: string, action: 'like' | 'disl
     throw error;
   }
 };
+
+export const getMatchesByUser = async () => {
+  try {
+    const token = authService.getToken();
+    const response = await api.get<ApiResponse<any[]>>('matches/matches-by-user', {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error al obtener matches:', error);
+    throw error;
+  }
+};

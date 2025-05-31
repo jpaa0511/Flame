@@ -10,11 +10,11 @@ interface UserCardProps {
 
 function getPhotoUrl(photoPath: string) {
   if (!photoPath) return '';
-  // Normaliza la ruta (cambia \ por /)
+
   const normalized = photoPath.replace(/\\/g, '/');
-  // Si ya es una URL absoluta, la retorna
+
   if (/^https?:\/\//.test(normalized)) return normalized;
-  // Si es relativa, la convierte a absoluta
+
   return `http://localhost:3000/${normalized}`;
 }
 
@@ -64,7 +64,7 @@ export default function UserCard({ user, onLike, onDislike }: UserCardProps) {
 
   return (
     <div className="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden">
-      {/* Modal de match */}
+
       {showMatchModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/30 backdrop-blur-md">
           <div className="bg-white rounded-2xl shadow-lg p-8 flex flex-col items-center relative animate-fade-in">
@@ -93,7 +93,7 @@ export default function UserCard({ user, onLike, onDislike }: UserCardProps) {
             className="w-full h-96 object-cover"
           />
         )}
-        {/* Flechas de navegación de fotos */}
+
         {totalPhotos > 1 && (
           <>
             <button
