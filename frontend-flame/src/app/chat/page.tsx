@@ -56,66 +56,86 @@ export default function ChatsPage() {
 
   if (loading) {
     return (
-      <>
+      <div className="flex flex-col min-h-screen bg-white">
         <Navbar />
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-pink-500"></div>
+        <div className="flex items-center justify-center min-h-screen bg-white">
+          <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-[#FE3C72]"></div>
         </div>
-      </>
+      </div>
     );
   }
 
   return (
-    <>
+    <div className="flex flex-col min-h-screen bg-white">
       <Navbar />
-      <div className="container mx-auto px-4 py-8 pt-24">
-        <h1 className="text-2xl font-bold text-gray-800 mb-6">Tus Chats</h1>
-        
-        {matches.length === 0 ? (
-          <div className="text-center py-8">
-            <p className="text-gray-600">No tienes chats activos</p>
-          </div>
-        ) : (
-          <div className="grid gap-4">
-            {matches.map((match) => (
-              <div
-                key={match.matchId}
-                onClick={() => handleChatClick(match.matchId)}
-                className="bg-white rounded-lg shadow-md p-4 cursor-pointer hover:shadow-lg transition-shadow"
-              >
-                <div className="flex items-center space-x-4">
-                  {/* Foto de perfil */}
-                  <div className="w-16 h-16 rounded-full overflow-hidden">
-                    <img
-                      src={match.user.photos[0] ? `http://localhost:3000/${match.user.photos[0].replace(/\\/g, '/')}` : '/default-avatar.png'}
-                      alt={match.user.name}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  
-                  {/* Información del chat */}
-                  <div className="flex-1">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h3 className="font-semibold text-gray-800">{match.user.name}</h3>
-                        <p className="text-sm text-gray-500">{match.user.age} años</p>
-                      </div>
-                      <span className="text-xs text-gray-500">
-                        {format(new Date(match.lastMessageAt), 'dd/MM/yyyy HH:mm', { locale: es })}
-                      </span>
+      <div className="flex flex-1 h-full">
+        {/* Lista de chats */}
+        <div className="w-1/3 border-r border-gray-200 overflow-y-auto">
+          <div className="p-4">
+            <h1 className="text-2xl font-bold text-gray-800 mb-6">Tus Chats</h1>
+            
+            {matches.length === 0 ? (
+              <div className="text-center py-8">
+                <p className="text-gray-600">No tienes chats activos</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {matches.map((match) => (
+                  <div
+                    key={match.matchId}
+                    onClick={() => handleChatClick(match.matchId)}
+                    className="flex items-center space-x-4 p-4 rounded-2xl cursor-pointer hover:bg-gray-50 transition-colors"
+                  >
+                    {/* Foto de perfil */}
+                    <div className="w-16 h-16 rounded-full overflow-hidden flex-shrink-0">
+                      <img
+                        src={match.user.photos[0] ? `http://localhost:3000/${match.user.photos[0].replace(/\\/g, '/')}` : '/default-avatar.png'}
+                        alt={match.user.name}
+                        className="w-full h-full object-cover"
+                      />
                     </div>
                     
-                    {/* Último mensaje */}
-                    <p className="text-sm text-gray-600 mt-1 truncate">
-                      {match.lastMessage || 'No hay mensajes aún'}
-                    </p>
+                    {/* Información del chat */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="font-semibold text-gray-800 truncate">{match.user.name}</h3>
+                          <p className="text-sm text-gray-500">{match.user.age} años</p>
+                        </div>
+                        <span className="text-xs text-gray-500 flex-shrink-0">
+                          {format(new Date(match.lastMessageAt), 'dd/MM/yyyy HH:mm', { locale: es })}
+                        </span>
+                      </div>
+                      
+                      {/* Último mensaje */}
+                      <p className="text-sm text-gray-600 mt-1 truncate">
+                        {match.lastMessage || 'No hay mensajes aún'}
+                      </p>
+                    </div>
                   </div>
-                </div>
+                ))}
               </div>
-            ))}
+            )}
           </div>
-        )}
+        </div>
+
+        {/* Área de chat seleccionado */}
+        <div className="flex-1 flex items-center justify-center bg-gray-50">
+          <div className="text-center text-gray-500">
+            <svg className="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            </svg>
+            <p className="text-lg">Selecciona un chat para comenzar</p>
+          </div>
+        </div>
       </div>
-    </>
+      <footer className="bg-gray-50 border-t border-gray-200">
+        <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+          <div className="text-center text-gray-500 text-sm">
+            <p>© 2024 Flame. Todos los derechos reservados.</p>
+          </div>
+        </div>
+      </footer>
+    </div>
   );
 } 

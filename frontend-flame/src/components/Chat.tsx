@@ -69,6 +69,13 @@ export default function Chat({ matchId, otherUserName }: ChatProps) {
     setNewMessage('');
   };
 
+  // Función para determinar si el mensaje es propio
+  const isOwnMessage = (msg: Message) => {
+    if (typeof msg.sender === 'string') return msg.sender === currentUserId;
+    if (typeof msg.sender === 'object' && msg.sender._id) return msg.sender._id === currentUserId;
+    return false;
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -78,53 +85,48 @@ export default function Chat({ matchId, otherUserName }: ChatProps) {
   }
 
   return (
-    <div className="flex flex-col h-full bg-white rounded-lg shadow-lg">
-
-      <div className="p-4 border-b">
-        <h2 className="text-xl font-semibold text-gray-800">Chat con {otherUserName}</h2>
+    <div className="flex flex-col h-full bg-white">
+      <div className="p-4 border-b border-gray-200">
+        <h2 className="text-xl font-semibold text-gray-800">{otherUserName}</h2>
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.map((message) => (
           <div
             key={message._id}
-            className={`flex ${message.sender._id === currentUserId ? 'justify-end' : 'justify-start'}`}
+            className={`flex ${isOwnMessage(message) ? 'justify-end' : 'justify-start'}`}
           >
-            <div
-              className={`max-w-[70%] rounded-lg p-3 ${
-                message.sender._id === currentUserId
-                  ? 'bg-pink-500 text-white'
-                  : 'bg-gray-100 text-gray-800'
-              }`}
-            >
-              <p className="text-sm">{message.content}</p>
-              <p className="text-xs mt-1 opacity-70">
-                {format(new Date(message.createdAt), 'HH:mm', { locale: es })}
-              </p>
+            <div className={`max-w-[70%] ${isOwnMessage(message) ? 'bg-[#FE3C72] text-white' : 'bg-gray-100 text-gray-800'} rounded-2xl px-4 py-2`}>
+              <div className="flex flex-col">
+                <p className="break-words">{message.content}</p>
+                <span className={`text-xs mt-1 ${isOwnMessage(message) ? 'text-white/80' : 'text-gray-500'} self-end`}>
+                  {format(new Date(message.createdAt), 'HH:mm')}
+                </span>
+              </div>
             </div>
           </div>
         ))}
         <div ref={messagesEndRef} />
       </div>
 
-      <form onSubmit={handleSendMessage} className="p-4 border-t">
-        <div className="flex space-x-2">
+      <div className="p-4 border-t border-gray-200">
+        <form onSubmit={handleSendMessage} className="flex gap-2">
           <input
             type="text"
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             placeholder="Escribe un mensaje..."
-            className="flex-1 px-4 py-2 border rounded-full focus:outline-none focus:ring-2 focus:ring-pink-500"
+            className="flex-1 px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#FE3C72] focus:border-transparent text-gray-800 placeholder-gray-400"
           />
           <button
             type="submit"
             disabled={!newMessage.trim()}
-            className="px-6 py-2 bg-pink-500 text-white rounded-full hover:bg-pink-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-2 bg-[#FE3C72] text-white rounded-full hover:bg-[#E62E5C] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             Enviar
           </button>
-        </div>
-      </form>
+        </form>
+      </div>
     </div>
   );
 } 
